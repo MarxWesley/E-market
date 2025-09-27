@@ -16,5 +16,13 @@
       "createdDate": "2025-09-04T22:56:11.663Z"
     }
   ],
-  "reminders": []
+  "users": [
+    {
+      "id": 1,
+      "nome":"Teste Admin",
+      "email":"teste@admin.com",
+      "cpf":"12345678900",
+      "senha":"123456"
+    }
+  ]
 }

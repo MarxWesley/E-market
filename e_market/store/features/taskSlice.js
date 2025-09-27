@@ -78,4 +78,3 @@ const taskSlice = createSlice({
 export const { removeAllTasks } = taskSlice.actions;
 export const { selectTasks, selectError, selectLoading } = taskSlice.selectors;
 export const tasksReducer = taskSlice.reducer;
-
