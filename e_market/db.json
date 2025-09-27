@@ -1,28 +1,11 @@
 {
-  "tasks": [
-    {
-      "name": "Tarefa 1",
-      "description": "Tarefa 1",
-      "done": true,
-      "id": "fc1a",
-      "createdDate": "2025-09-04T22:56:11.663Z",
-      "completedDate": "2025-09-04T22:59:00.440Z"
-    },
-    {
-      "name": "Tarefa 2",
-      "description": "Tarefa 2",
-      "done": false,
-      "id": "fc1c",
-      "createdDate": "2025-09-04T22:56:11.663Z"
-    }
-  ],
   "users": [
     {
       "id": 1,
-      "nome":"Teste Admin",
-      "email":"teste@admin.com",
-      "cpf":"12345678900",
-      "senha":"123456"
+      "nome": "Teste Admin",
+      "email": "teste@admin.com",
+      "cpf": "12345678900",
+      "senha": "123456"
     }
   ]
 }
