@@ -1,10 +1,10 @@
 // src/redux/authSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { login } from "../services/authService";
+import authService from "../../services/authService";
 
 export const loginUser = createAsyncThunk("auth/loginUser", async ({ email, senha }, { rejectWhiteValue }) => {
     try {
-        return await login(email, senha);
+        return await authService.login(email, senha);
     } catch (error) {
         return rejectWhiteValue(error.message)
     }

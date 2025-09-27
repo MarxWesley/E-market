@@ -3,7 +3,7 @@ import axios from "axios";
 
 const API_URL = "http://localhost:3000/users";
 
-export const login = async (email, senha) => {
+const login = async (email, senha) => {
 
     const response = await axios.get(`${API_URL}?email=${email}&senha=${senha}`);
 
@@ -15,3 +15,7 @@ export const login = async (email, senha) => {
         throw new Error("Credenciais inválidas");
     }
 };
+
+export default {
+    login,
+}

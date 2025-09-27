@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import * as userService from "../services/userService";
+import userService from "../../services/userService";
 
 // Thunks assíncronos
 export const fetchUsers = createAsyncThunk("users/fetchAll", async () => {
