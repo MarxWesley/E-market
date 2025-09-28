@@ -7,5 +7,38 @@
       "cpf": "12345678900",
       "senha": "123456"
     }
+  ],
+  "product": [
+    {
+      "id": "uuid1",
+      "title": "Notebook Dell",
+      "description": "i7, 16GB RAM, SSD 512GB",
+      "price": 3500.00,
+      "category": "eletronicos",
+      "condition": "novo",
+      "images": [
+        "img1.jpg",
+        "img2.jpg"
+      ],
+      "type": "item",
+      "createdAt": "2025-09-28T12:00:00Z"
+    },
+    {
+      "id": "uuid2",
+      "title": "Fiat Uno 2012",
+      "description": "1.0 Flex, IPVA pago",
+      "price": 15000.00,
+      "category": "carros",
+      "condition": "usado",
+      "images": [
+        "uno1.jpg",
+        "uno2.jpg"
+      ],
+      "type": "vehicle",
+      "brand": "Fiat",
+      "model": "Uno",
+      "year": 2012,
+      "mileage": 120000
+    }
   ]
 }

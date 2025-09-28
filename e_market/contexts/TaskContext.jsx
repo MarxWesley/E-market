@@ -13,19 +13,6 @@ export const TaskContext = createContext({
 export const TaskContextProvider = ({ children }) => {
   const [tasks, setTasks] = useState([]);
 
-  // useEffect(() => {
-  //   // taskService
-  //   //   .getTasks()
-  //   //   .then(response => {
-  //   //     setTasks(response);
-  //   //   });
-  //   const loadTasks = async () => {
-  //     const response = await taskService.getTasks();
-  //     setTasks(response);
-  //   };
-  //   loadTasks();
-  // }, [])
-
   const addTask = async (task) => {
     task.id = new Date().toISOString();
     task.createdDate = new Date();

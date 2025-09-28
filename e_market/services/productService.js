@@ -15,8 +15,14 @@ const getProductById = async (id) => {
 };
 
 // Buscar produto pelo nome
-const getProductsByName = async (name) => {
-    const response = await axios.get(`${API_URL}/products?name=${name}`);
+const getProductsByTitle = async (title) => {
+    const response = await axios.get(`${API_URL}/products?title=${title}`);
+    return response.data;
+};
+
+// Buscar categorias
+const getCategories = async () => {
+    const response = await axios.get(`${API_URL}/categories`);
     return response.data;
 };
 
@@ -42,16 +48,11 @@ const deleteProduct = async (id) => {
     return response.data;
 };
 
-// Buscar categorias
-const getCategories = async () => {
-    const response = await axios.get(`${API_URL}/categories`);
-    return response.data;
-};
 
 export default {
     getAllProducts,
     getProductById,
-    getProductsByName,
+    getProductsByTitle,
     createProduct,
     updateProduct,
     deleteProduct,
