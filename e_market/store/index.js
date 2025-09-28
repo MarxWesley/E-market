@@ -1,14 +1,11 @@
+// store/index.js
 import { configureStore } from "@reduxjs/toolkit";
 import { tasksReducer } from "./features/taskSlice";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import authReducer from "./features/authSlice"; // ⬅ default
 
 export const store = configureStore({
-    reducer: {
-        tasks: tasksReducer
-    }
+  reducer: {
+    tasks: tasksReducer,
+    auth: authReducer, // ⬅ registra o auth
+  },
 });
-
-// store.subscribe(() => {
-//     console.log('store: ', store.getState().tasks);
-//     AsyncStorage.setItem('@TASKS', JSON.stringify(store.getState().tasks));
-// });

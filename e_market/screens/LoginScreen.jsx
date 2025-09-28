@@ -13,10 +13,10 @@ import { useNavigation } from "@react-navigation/native";
 import { useForm, Controller } from "react-hook-form";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useDispatch, useSelector } from "react-redux";
+import { loginUser } from "../store/features/authSlice"; // thunk
 
-// ⚠️ requer react-native-svg + react-native-svg-transformer e metro.config.js configurado
-// import relativo: screens -> assets
-import Logo from "../assets/logo.svg";
+import Logo from "../assets/logo.svg"; // requer react-native-svg + transformer
 
 const PRIMARY = "#2F87E1";
 
@@ -27,26 +27,31 @@ const schema = Yup.object({
 
 export default function LoginScreen() {
   const navigation = useNavigation();
+  const dispatch = useDispatch();
+  const { loading, error } = useSelector((s) => s.auth);
+
   const [show, setShow] = useState(false);
 
   const {
     control,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    setError,
+    formState: { errors },
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: { email: "", senha: "" },
     mode: "onChange",
   });
 
-  const onSubmit = async (values) => {
+  const onSubmit = async ({ email, senha }) => {
     try {
-      // Ex.: await authService.login(values.email, values.senha)
-      // Simulação de sucesso:
-      await new Promise((r) => setTimeout(r, 500));
-      navigation.replace("TaskHome");
+      // dispara a thunk e aguarda; se falhar, lança (por causa do unwrap)
+      await dispatch(loginUser({ email, senha })).unwrap();
+      // sucesso: RootNavigator vai detectar token no Redux e trocar para AppTabs
     } catch (e) {
-      console.log(e);
+      // mostra erro nos campos (sem poluir a UI)
+      setError("email", { message: "Credenciais inválidas" });
+      setError("senha", { message: " " });
     }
   };
 
@@ -60,7 +65,6 @@ export default function LoginScreen() {
           {/* Logo */}
           <View style={styles.logoRow}>
             <Logo width={330} height={100} />
-            
           </View>
 
           {/* Email */}
@@ -114,24 +118,29 @@ export default function LoginScreen() {
             )}
           />
 
+          {/* Erro global vindo do servidor */}
+          {!!error && <Text style={[styles.errorText, { textAlign: "center", marginBottom: 8 }]}>{error}</Text>}
+
           <TouchableOpacity>
             <Text style={styles.forgot}>Esqueci minha senha</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.button, isSubmitting && { opacity: 0.6 }]}
+            style={[styles.button, loading && { opacity: 0.6 }]}
             onPress={handleSubmit(onSubmit)}
-            disabled={isSubmitting}
+            disabled={loading}
           >
             <Text style={styles.buttonText}>
-              {isSubmitting ? "Entrando..." : "Entrar"}
+              {loading ? "Entrando..." : "Entrar"}
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.secondaryButton} onPress={() => navigation.navigate("Register")}>
-              <Text style={styles.secondaryText}>Criar conta</Text>
+          <TouchableOpacity
+            style={styles.secondaryButton}
+            onPress={() => navigation.navigate("Register")}
+          >
+            <Text style={styles.secondaryText}>Criar conta</Text>
           </TouchableOpacity>
-
         </View>
       </View>
     </KeyboardAvoidingView>
@@ -160,7 +169,6 @@ const styles = StyleSheet.create({
     gap: 10,
     marginBottom: 18,
   },
-  logoText: { fontSize: 28, fontWeight: "700" },
   inputWrap: { marginBottom: 12 },
   input: {
     borderWidth: 1,

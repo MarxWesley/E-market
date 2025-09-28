@@ -1,3 +1,4 @@
+// screens/RegisterScreen.jsx
 import React, { useState } from "react";
 import {
   View,
@@ -7,18 +8,19 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
-  Alert,
 } from "react-native";
-import { useNavigation } from "@react-navigation/native";
 import { useForm, Controller } from "react-hook-form";
 import { MaskedTextInput } from "react-native-mask-text";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useDispatch, useSelector } from "react-redux";
+import { loginUser } from "../store/features/authSlice";
+import userService from "../services/userService";
 import Logo from "../assets/logo.svg";
 
 const PRIMARY = "#2F87E1";
 
-// validação
+// ✅ validação
 const schema = Yup.object({
   nome: Yup.string().trim().min(3, "Mínimo 3 letras").required("Informe o nome"),
   email: Yup.string().email("Email inválido").required("Informe o email"),
@@ -32,13 +34,16 @@ const schema = Yup.object({
 });
 
 export default function RegisterScreen() {
-  const navigation = useNavigation();
+  const dispatch = useDispatch();
+  const { loading, error } = useSelector((s) => s.auth);
+
   const [showPass, setShowPass] = useState(false);
   const [showConf, setShowConf] = useState(false);
 
   const {
     control,
     handleSubmit,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: yupResolver(schema),
@@ -48,26 +53,34 @@ export default function RegisterScreen() {
 
   const onSubmit = async (values) => {
     try {
-      // Aqui depois: chamada ao backend (service de auth/usuário)
-      // ex: await userService.register({ ...values, cpf: values.cpf.replace(/\D/g,'') })
-      await new Promise((r) => setTimeout(r, 600));
-      Alert.alert("Conta criada!", "Bem-vindo(a) ao E-market.");
-      navigation.replace("TaskHome");
+      const payload = {
+        nome: values.nome.trim(),
+        email: values.email.trim().toLowerCase(),
+        cpf: values.cpf.replace(/\D/g, ""), // remove máscara
+        senha: values.senha,
+      };
+
+      // 1️⃣ Cria usuário no backend
+      await userService.createUser(payload);
+
+      // 2️⃣ Login automático → Redux guarda token e usuário
+      await dispatch(loginUser({ email: payload.email, senha: payload.senha })).unwrap();
+
+      // 🚀 O RootNavigator detecta o token e redireciona para AppTabs
     } catch (e) {
-      Alert.alert("Erro", "Não foi possível criar a conta.");
-      console.log(e);
+      const msg = typeof e === "string" ? e : e?.message || "Erro ao registrar";
+      setError("email", { message: msg });
     }
   };
 
   return (
     <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <View style={styles.container}>
-              <View style={styles.card}>
-                {/* Logo */}
-                <View style={styles.logoRow}>
-                  <Logo width={330} height={100} />
-                  
-                </View>
+        <View style={styles.card}>
+          {/* Logo */}
+          <View style={styles.logoRow}>
+            <Logo width={330} height={100} />
+          </View>
 
           {/* Nome */}
           <Controller
@@ -107,7 +120,7 @@ export default function RegisterScreen() {
             )}
           />
 
-          {/* CPF (com máscara) */}
+          {/* CPF */}
           <Controller
             name="cpf"
             control={control}
@@ -172,13 +185,16 @@ export default function RegisterScreen() {
             )}
           />
 
+          {/* Erro global */}
+          {!!error && <Text style={[styles.errorText, { textAlign: "center", marginBottom: 8 }]}>{error}</Text>}
+
           {/* Botão Criar */}
           <TouchableOpacity
-            style={[styles.button, isSubmitting && { opacity: 0.6 }]}
+            style={[styles.button, (isSubmitting || loading) && { opacity: 0.6 }]}
             onPress={handleSubmit(onSubmit)}
-            disabled={isSubmitting}
+            disabled={isSubmitting || loading}
           >
-            <Text style={styles.buttonText}>{isSubmitting ? "Criando..." : "Criar"}</Text>
+            <Text style={styles.buttonText}>{isSubmitting || loading ? "Criando..." : "Criar"}</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -198,7 +214,6 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   logoRow: { flexDirection: "row", alignItems: "center", gap: 10, marginBottom: 18 },
-  logoText: { fontSize: 28, fontWeight: "700" },
   inputWrap: { marginBottom: 12 },
   input: {
     borderWidth: 1,
