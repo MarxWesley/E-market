@@ -1,4 +1,3 @@
-// App.js
 import { StyleSheet } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -6,6 +5,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Provider as ReduxProvider, useSelector } from "react-redux";
 import { Provider as PaperProvider } from "react-native-paper";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 import { store } from "./store";
 
@@ -19,6 +19,7 @@ import SellScreen from "./screens/SellScreen";
 import MessageScreen from "./screens/MessageScreen";
 import AccountScreen from "./screens/AccountScreen";
 
+// ✅ FALTAVA ISSO
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -27,17 +28,17 @@ function AppTabs() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
-        tabBarActiveTintColor: "#2F87E1",
-        tabBarIcon: ({ color, size }) => {
-          const icons = {
-            Marketplace: "shopping-outline",
-            Vender: "tag-outline",
-            Mensagem: "message-outline",
-            Perfil: "account-circle-outline",
-          };
-          return (
-            <MaterialCommunityIcons name={icons[route.name]} color={color} size={size} />
-          );
+        tabBarActiveTintColor: "#319BE5",
+        tabBarInactiveTintColor: "#000",
+        tabBarStyle: { height: 58, borderTopWidth: 1, borderTopColor: "#eaeaea", backgroundColor: "#fff" },
+        tabBarLabelStyle: { fontSize: 12, marginBottom: 4 },
+        tabBarIcon: ({ color, focused }) => {
+          let name;
+          if (route.name === "Marketplace") name = focused ? "storefront" : "storefront-outline";
+          else if (route.name === "Vender") name = focused ? "pricetag" : "pricetag-outline";
+          else if (route.name === "Mensagem") name = focused ? "chatbubble" : "chatbubble-outline";
+          else if (route.name === "Perfil") name = focused ? "person" : "person-outline";
+          return <Ionicons name={name} size={22} color={color} />;
         },
       })}
     >
@@ -51,7 +52,6 @@ function AppTabs() {
 
 function RootNavigator() {
   const token = useSelector((state) => state.auth?.token);
-
   return (
     <Stack.Navigator>
       {token ? (
