@@ -1,3 +1,4 @@
+// App.js (feat/peter atualizado)
 import { StyleSheet } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -19,7 +20,11 @@ import SellScreen from "./screens/SellScreen";
 import MessageScreen from "./screens/MessageScreen";
 import AccountScreen from "./screens/AccountScreen";
 
-// ✅ FALTAVA ISSO
+// Extras (fora do tab) — vieram da main
+import ItemScreen from "./screens/ItemScreen";
+import VehicleScreen from "./screens/VehicleScreen";
+import MyClassifieds from "./screens/MyClassifieds";
+
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
@@ -52,13 +57,34 @@ function AppTabs() {
 
 function RootNavigator() {
   const token = useSelector((state) => state.auth?.token);
+
   return (
-    <Stack.Navigator>
+    <Stack.Navigator screenOptions={{ headerShown: false }}>
       {token ? (
-        <Stack.Screen name="AppTabs" component={AppTabs} options={{ headerShown: false }} />
+        <>
+          {/* Tabs como raiz quando logado */}
+          <Stack.Screen name="AppTabs" component={AppTabs} />
+
+          {/* Telas extras sem tab bar (mesmo padrão da main) */}
+          <Stack.Screen
+            name="ItemScreen"
+            component={ItemScreen}
+            options={{ headerShown: true, title: "Novo Item" }}
+          />
+          <Stack.Screen
+            name="VehicleScreen"
+            component={VehicleScreen}
+            options={{ headerShown: true, title: "Novo Veículo" }}
+          />
+          <Stack.Screen
+            name="MyClassifieds"
+            component={MyClassifieds}
+            options={{ headerShown: true, title: "Meus Classificados" }}
+          />
+        </>
       ) : (
         <>
-          <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="Login" component={LoginScreen} />
           <Stack.Screen name="Register" component={RegisterScreen} options={{ title: "Criar conta" }} />
         </>
       )}
