@@ -9,20 +9,19 @@ import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 
 import { store } from "./store";
 
-// Screens
+// Auth
 import LoginScreen from "./screens/LoginScreen";
 import RegisterScreen from "./screens/RegisterScreen";
 
-// Tabs (use suas telas reais)
-import TaskHomeScreen from "./screens/TaskHomeScreen";   // Marketplace (Home)
-import TaskListScreen from "./screens/TaskListScreen";   // Mensagem (placeholder)
-import TaskFormScreen from "./screens/TaskFormScreen";   // Vender (form)
-import TaskDetailScreen from "./screens/TaskDetailScreen"; // Perfil (placeholder)
+// Tabs (da main)
+import MarketPlaceScreen from "./screens/MarketPlaceScreen";
+import SellScreen from "./screens/SellScreen";
+import MessageScreen from "./screens/MessageScreen";
+import AccountScreen from "./screens/AccountScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
-/** Abas do app quando o usuário ESTÁ logado */
 function AppTabs() {
   return (
     <Tab.Navigator
@@ -42,17 +41,15 @@ function AppTabs() {
         },
       })}
     >
-      <Tab.Screen name="Marketplace" component={TaskHomeScreen} />
-      <Tab.Screen name="Vender" component={TaskFormScreen} />
-      <Tab.Screen name="Mensagem" component={TaskListScreen} />
-      <Tab.Screen name="Perfil" component={TaskDetailScreen} />
+      <Tab.Screen name="Marketplace" component={MarketPlaceScreen} />
+      <Tab.Screen name="Vender" component={SellScreen} />
+      <Tab.Screen name="Mensagem" component={MessageScreen} />
+      <Tab.Screen name="Perfil" component={AccountScreen} />
     </Tab.Navigator>
   );
 }
 
-/** Root decide entre AuthStack (não logado) e AppTabs (logado) */
 function RootNavigator() {
-  // ajuste o selector se seu reducer estiver em outra chave
   const token = useSelector((state) => state.auth?.token);
 
   return (
