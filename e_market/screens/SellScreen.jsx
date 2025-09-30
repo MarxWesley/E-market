@@ -1,11 +1,7 @@
 // screens/SellScreen.js
-import React from "react";
 import { StyleSheet, View } from "react-native";
 import CustomButton from "../components/ui/CustomButton";
 import { useNavigation } from "@react-navigation/native";
-import ItemScreen from "./ItemScreen";
-import VehicleScren from "./VehicleScreen";
-import MyClassifieds from "./MyClassifieds";
 
 export default function SellScreen() {
   const navigation = useNavigation();
