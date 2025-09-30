@@ -1,3 +1,31 @@
-export default function SellScreen () {
-    
+// screens/SellScreen.js
+import React from "react";
+import { StyleSheet, View } from "react-native";
+import CustomButton from "../components/ui/CustomButton";
+import { useNavigation } from "@react-navigation/native";
+import ItemScreen from "./ItemScreen";
+import VehicleScren from "./VehicleScreen";
+import MyClassifieds from "./MyClassifieds";
+
+export default function SellScreen() {
+  const navigation = useNavigation();
+
+    return (
+        <View style={styles.container}>
+            <CustomButton text="Um Item" icon="bag-outline" onPress={() => {navigation.navigate("ItemScreen")}} />
+            <CustomButton text="Veículo" icon="car-outline" onPress={() => {navigation.navigate("VehicleScreen")}} />
+            <CustomButton text="Meus classificados" icon="pricetag-outline" onPress={() => {navigation.navigate("MyClassifieds")}} />
+        </View>
+    );
 }
+
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+        justifyContent: "center",
+        alignItems: "center",
+        padding: 20,
+        backgroundColor: "#fff",
+        width: "100%",
+    },
+});
