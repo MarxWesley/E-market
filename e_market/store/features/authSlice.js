@@ -42,4 +42,4 @@ const authSlice = createSlice({
 });
 
 export const { logout } = authSlice.actions;
-export default authSlice.reducer; // <-- export default facilita no store
+export const authReducer =  authSlice.reducer; // <-- export default facilita no store
