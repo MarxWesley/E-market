@@ -8,6 +8,8 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
+  Image,
+  ImageBackground,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useForm, Controller } from "react-hook-form";
@@ -15,8 +17,6 @@ import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "../store/features/authSlice"; // thunk
-
-import Logo from "../assets/logo.svg"; // requer react-native-svg + transformer
 
 const PRIMARY = "#2F87E1";
 
@@ -60,13 +60,20 @@ export default function LoginScreen() {
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
     >
-      <View style={styles.container}>
+      <ImageBackground
+        source={require("../assets/background.png")}
+        resizeMode="cover"
+        style={{ flex: 1, width: "100%", height: "100%", justifyContent: "center" , alignItems: "center"}}
+      >
         <View style={styles.card}>
           {/* Logo */}
           <View style={styles.logoRow}>
-            <Logo width={330} height={100} />
+            <Image
+              source={require("../assets/logo.png")}
+              style={{ width: "100%", height: 100 }}
+              resizeMode="contain"
+            />
           </View>
-
           {/* Email */}
           <Controller
             name="email"
@@ -88,7 +95,6 @@ export default function LoginScreen() {
               </View>
             )}
           />
-
           {/* Senha */}
           <Controller
             name="senha"
@@ -117,14 +123,20 @@ export default function LoginScreen() {
               </View>
             )}
           />
-
           {/* Erro global vindo do servidor */}
-          {!!error && <Text style={[styles.errorText, { textAlign: "center", marginBottom: 8 }]}>{error}</Text>}
-
+          {!!error && (
+            <Text
+              style={[
+                styles.errorText,
+                { textAlign: "center", marginBottom: 8 },
+              ]}
+            >
+              {error}
+            </Text>
+          )}
           <TouchableOpacity>
             <Text style={styles.forgot}>Esqueci minha senha</Text>
           </TouchableOpacity>
-
           <TouchableOpacity
             style={[styles.button, loading && { opacity: 0.6 }]}
             onPress={handleSubmit(onSubmit)}
@@ -134,7 +146,6 @@ export default function LoginScreen() {
               {loading ? "Entrando..." : "Entrar"}
             </Text>
           </TouchableOpacity>
-
           <TouchableOpacity
             style={styles.secondaryButton}
             onPress={() => navigation.navigate("Register")}
@@ -142,7 +153,7 @@ export default function LoginScreen() {
             <Text style={styles.secondaryText}>Criar conta</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      </ImageBackground>
     </KeyboardAvoidingView>
   );
 }
@@ -158,6 +169,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
     borderRadius: 12,
     padding: 20,
+    width: "90%",
+    // Centraliza o card na tela
+    alignSelf: "center",
+    // Sombra (iOS)
     shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowRadius: 12,
@@ -166,6 +181,7 @@ const styles = StyleSheet.create({
   logoRow: {
     flexDirection: "row",
     alignItems: "center",
+    justifyContent: "center", // centraliza horizontalmente
     gap: 10,
     marginBottom: 18,
   },
