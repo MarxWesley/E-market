@@ -72,6 +72,17 @@
       "images": [
         "blob:http://localhost:8081/34ac0a8b-bca6-454b-9ade-0aa375573675"
       ]
+    },
+    {
+      "id": "2b88f2d2-110a-4dfe-b624-a614e8a689f9",
+      "title": "CG 150",
+      "brand": "HONDA",
+      "model": "CG 150 TITAN KS",
+      "mileage": "5100",
+      "price": 7500,
+      "description": "moto zera",
+      "category": "veiculos",
+      "images": []
     }
   ]
 }
