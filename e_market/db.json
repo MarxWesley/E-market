@@ -31,4 +31,73 @@
   ],
   "tasks": [],
   "reminders": []
+,
+
+"product": [
+    {
+      "id": "uuid1",
+      "title": "Notebook Dell",
+      "description": "i7, 16GB RAM, SSD 512GB",
+      "price": 3500,
+      "category": "eletronicos",
+      "condition": "novo",
+      "images": [
+        "img1.jpg",
+        "img2.jpg"
+      ],
+      "type": "item",
+      "createdAt": "2025-09-28T12:00:00Z"
+    },
+    {
+      "id": "uuid2",
+      "title": "Fiat Uno 2012",
+      "description": "1.0 Flex, IPVA pago",
+      "price": 15000,
+      "category": "carros",
+      "condition": "usado",
+      "images": [
+        "uno1.jpg",
+        "uno2.jpg"
+      ],
+      "type": "vehicle",
+      "brand": "Fiat",
+      "model": "Uno",
+      "year": 2012,
+      "mileage": 120000
+    },
+    {
+      "id": "121630a0-c784-4862-9af5-2c45c2c62b6c",
+      "title": "123123412",
+      "price": 2143124,
+      "category": "Roupas",
+      "condition": "Novo",
+      "description": "",
+      "images": [
+        "blob:http://localhost:8081/588f7f9a-3ef1-4bc8-b8db-34247dab579e"
+      ]
+    },
+    {
+      "id": "7399d425-a912-4981-9edb-fe29fdc67914",
+      "title": "123123412",
+      "price": 2143124,
+      "category": "Roupas",
+      "condition": "Novo",
+      "description": "",
+      "images": [
+        "blob:http://localhost:8081/588f7f9a-3ef1-4bc8-b8db-34247dab579e"
+      ]
+    },
+    {
+      "id": "50197ca5-24ab-462f-ab84-bac505766ebe",
+      "title": "Isa",
+      "price": 12,
+      "category": "Eletrônicos",
+      "condition": "Novo",
+      "description": "asfas",
+      "images": [
+        "blob:http://localhost:8081/34ac0a8b-bca6-454b-9ade-0aa375573675"
+      ]
+    }
+  ] 
+
 }
