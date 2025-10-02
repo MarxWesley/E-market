@@ -30,10 +30,8 @@
     }
   ],
   "tasks": [],
-  "reminders": []
-,
-
-"product": [
+  "reminders": [],
+  "product": [
     {
       "id": "uuid1",
       "title": "Notebook Dell",
@@ -97,7 +95,28 @@
       "images": [
         "blob:http://localhost:8081/34ac0a8b-bca6-454b-9ade-0aa375573675"
       ]
+    },
+    {
+      "id": "7399d425-a912-4981-9edb-fe29fdc67914",
+      "title": "123123412",
+      "price": 2143124,
+      "category": "Roupas",
+      "condition": "Novo",
+      "description": "",
+      "images": [
+        "blob:http://localhost:8081/588f7f9a-3ef1-4bc8-b8db-34247dab579e"
+      ]
+    },
+    {
+      "id": "50197ca5-24ab-462f-ab84-bac505766ese",
+      "title": "Isa",
+      "price": 12,
+      "category": "Eletrônicos",
+      "condition": "Novo",
+      "description": "asfas",
+      "images": [
+        "blob:http://localhost:8081/34ac0a8b-bca6-454b-9ade-0aa375573675"
+      ]
     }
-  ] 
-
+  ]
 }

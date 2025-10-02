@@ -3,9 +3,6 @@ import React from "react";
 import { StyleSheet, View } from "react-native";
 import CustomButton from "../components/ui/CustomButton";
 import { useNavigation } from "@react-navigation/native";
-import ItemScreen from "./ItemScreen";
-import VehicleScren from "./VehicleScreen";
-import MyClassifieds from "./MyClassifieds";
 
 export default function SellScreen() {
   const navigation = useNavigation();
@@ -25,7 +22,6 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         padding: 20,
-        backgroundColor: "#fff",
         width: "100%",
     },
 });
