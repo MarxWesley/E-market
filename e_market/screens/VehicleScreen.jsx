@@ -1,4 +1,3 @@
-import React, { useState } from "react";
 import {
   View,
   Text,
@@ -12,11 +11,11 @@ import {
   Alert,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import { Picker } from "@react-native-picker/picker";
 import { v4 as uuidv4 } from "uuid";
 import { useForm, Controller, set } from "react-hook-form";
 import { ImagePlus } from "lucide-react-native";
 import DropDownPicker from "react-native-dropdown-picker";
+import axios from "axios";
 
 export default function VehicleScren(params) {
   const [images, setImages] = useState([]);
@@ -77,6 +76,8 @@ export default function VehicleScren(params) {
     }
   };
 
+  const user = useSelector(state => state.auth.user);
+
   const onSubmit = async (data) => {
     const newVehicle = {
       id: uuidv4(),
@@ -84,14 +85,11 @@ export default function VehicleScren(params) {
       price: parseFloat(data.price),
       category: "veiculos",
       images,
+      userId: user.id,
     };
 
     try {
-      const response = await fetch("http://localhost:3000/product", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newVehicle),
-      });
+      const response = await axios.post("http://localhost:3000/product");
 
       if (response.ok) {
         Alert.alert("Sucesso", "Veículo publicado!");

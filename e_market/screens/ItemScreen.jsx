@@ -12,12 +12,12 @@ import {
   Alert,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import { Picker } from "@react-native-picker/picker";
 import { v4 as uuidv4 } from "uuid";
 import { useForm, Controller } from "react-hook-form";
 import { ImagePlus } from "lucide-react-native";
 import DropDownPicker from "react-native-dropdown-picker";
-
+import { useDispatch, useSelector } from "react-redux";
+import axios from 'axios';
 
 export default function ItemScreen() {
   const [images, setImages] = useState([]);
@@ -74,20 +74,19 @@ export default function ItemScreen() {
     }
   };
 
+  const user = useSelector(state => state.auth.user);  // Pega o usuário logado do Redux
+
   const onSubmit = async (data) => {
     const newItem = {
       id: uuidv4(),
       ...data,
       price: parseFloat(data.price),
       images,
+      userId: user.id,
     };
 
     try {
-      const response = await fetch("http://localhost:3000/product", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(newItem),
-      });
+      const response = await axios.post("http://localhost:3000/product");
 
       if (response.ok) {
         Alert.alert("Sucesso", "Item publicado!");
