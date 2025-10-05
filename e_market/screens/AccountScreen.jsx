@@ -1,29 +1,26 @@
 import React, { useCallback, useState } from 'react';
 import {
-  View,
-  Text,
-  StyleSheet,
-  Image,
-  TouchableOpacity,
-  Alert,
-  Switch,
-  ScrollView,
+  View, Text, StyleSheet, Image, TouchableOpacity, Alert, Switch, ScrollView,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { logout } from "../store/features/authSlice"
-import DialogComponent from "../components/ui/DialogComponent";
-
-// Ajuste os paths conforme seu projeto
-import userService from '../services/userService';
 import { useDispatch } from 'react-redux';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+
+import { logout } from '../store/features/authSlice';
+import DialogComponent from '../components/ui/DialogComponent';
+import userService from '../services/userService';
 
 export default function AccountScreen() {
   const navigation = useNavigation();
+  const dispatch = useDispatch();
+  const insets = useSafeAreaInsets(); // 👈 pega altura segura do rodapé
+
   const [user, setUser] = useState(null);
   const [darkMode, setDarkMode] = useState(false);
   const [stats, setStats] = useState({ listings: 0, sold: 0, favorites: 0 });
+  const [dialogVisible, setDialogVisible] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
@@ -54,18 +51,13 @@ export default function AccountScreen() {
     }
   };
 
-  const  dispatch = useDispatch();
-
-  const [dialogVisible, setDialogVisible] = useState(false);
-
   const handleConfirmLogout = async () => {
-      dispatch(logout());
-      setDialogVisible(false);
-  }
+    dispatch(logout());
+    setDialogVisible(false);
+  };
 
   const menu = [
     { key: 'myClassifieds', icon: 'pricetags-outline', label: 'Meus classificados', onPress: () => navigation.navigate('MyClassifieds') },
-    { key: 'sell', icon: 'add-circle-outline', label: 'Vender um item', onPress: () => navigation.navigate('Sell') },
     { key: 'favorites', icon: 'heart-outline', label: 'Favoritos', onPress: () => navigation.navigate('Favorites') },
     { key: 'edit', icon: 'person-outline', label: 'Editar perfil', onPress: () => navigation.navigate('EditProfile') },
     { key: 'address', icon: 'home-outline', label: 'Endereços', onPress: () => navigation.navigate('Addresses') },
@@ -75,9 +67,9 @@ export default function AccountScreen() {
   ];
 
   return (
-    <View style={[styles.container, darkMode && { backgroundColor: '#0B1220' }]}>
+    <SafeAreaView style={[styles.container, darkMode && { backgroundColor: '#0B1220' }]} edges={['bottom']}>
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: 120 }]} // espaço pro footer
         showsVerticalScrollIndicator={false}
       >
         {/* Cabeçalho */}
@@ -139,29 +131,26 @@ export default function AccountScreen() {
             </View>
           ))}
         </View>
+      </ScrollView>
 
-        {/* Espaço para o botão não colar no rodapé em telas pequenas */}
-        <View style={{ height: 8 }} />
-
-        {/* Botão Sair */}
+      {/* FOOTER fixo com respeito ao safe area + tab bar */}
+      <View style={[styles.footer, { paddingBottom: insets.bottom + 8 }]}>
         <TouchableOpacity style={styles.logoutBtn} onPress={() => setDialogVisible(true)}>
           <Ionicons name="log-out-outline" size={18} color="#fff" style={{ marginRight: 8 }} />
           <Text style={styles.logoutText}>Sair</Text>
         </TouchableOpacity>
+      </View>
 
-        <DialogComponent
-          visible={dialogVisible}
-          icon="account-remove"
-          title="Deseja realmente sair?"
-          onConfirm={handleConfirmLogout}
-          onDismiss={() => setDialogVisible(false)}
-          textConfirm={"Sim"}
-          textCancel={"Cancelar"}
-        />
-        {/* Padding final para não ficar colado em iPhones com gestos */}
-        <View style={{ height: 16 }} />
-      </ScrollView>
-    </View>
+      <DialogComponent
+        visible={dialogVisible}
+        icon="account-remove"
+        title="Deseja realmente sair?"
+        onConfirm={handleConfirmLogout}
+        onDismiss={() => setDialogVisible(false)}
+        textConfirm="Sim"
+        textCancel="Cancelar"
+      />
+    </SafeAreaView>
   );
 }
 
@@ -176,16 +165,11 @@ function StatCard({ label, value }) {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#F3F4F6' },
-  scrollContent: { padding: 16, paddingBottom: 24 },
+  scrollContent: { padding: 16 },
   header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 14,
-    padding: 14,
-    marginBottom: 12,
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: '#FFFFFF', borderWidth: 1, borderColor: '#E5E7EB',
+    borderRadius: 14, padding: 14, marginBottom: 12,
   },
   avatarWrap: { marginRight: 12 },
   avatar: { width: 56, height: 56, borderRadius: 28 },
@@ -196,24 +180,13 @@ const styles = StyleSheet.create({
 
   statsRow: { flexDirection: 'row', gap: 10, marginBottom: 12 },
   statCard: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 14,
-    paddingVertical: 14,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
+    flex: 1, backgroundColor: '#FFFFFF', borderRadius: 14,
+    paddingVertical: 14, alignItems: 'center', borderWidth: 1, borderColor: '#E5E7EB',
   },
   statValue: { fontSize: 18, fontWeight: '700', color: '#111827' },
   statLabel: { fontSize: 12, color: '#6B7280', marginTop: 2 },
 
-  card: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    marginBottom: 12,
-  },
+  card: { backgroundColor: '#FFFFFF', borderRadius: 14, borderWidth: 1, borderColor: '#E5E7EB', marginBottom: 12 },
   row: { paddingVertical: 14, paddingHorizontal: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   rowLeft: { flexDirection: 'row', alignItems: 'center' },
   rowText: { fontSize: 15, color: '#111827' },
@@ -221,6 +194,16 @@ const styles = StyleSheet.create({
 
   switchRow: { padding: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   switchText: { fontSize: 15, color: '#111827' },
+
+  /** Footer fixo */
+  footer: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,           // cola no rodapé
+    paddingHorizontal: 16,
+    backgroundColor: 'transparent',
+  },
 
   logoutBtn: {
     flexDirection: 'row',
