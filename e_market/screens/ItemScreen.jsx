@@ -12,14 +12,17 @@ import {
   Alert,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
+import * as FileSystem from "expo-file-system/legacy";
 import { v4 as uuidv4 } from "uuid";
 import { useForm, Controller } from "react-hook-form";
 import { ImagePlus } from "lucide-react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import { useDispatch, useSelector } from "react-redux";
-import axios from 'axios';
+import { addProduct } from "../store/features/productSlice";
 
 export default function ItemScreen() {
+  const dispatch = useDispatch();
+
   const [images, setImages] = useState([]);
   const [focusedField, setFocusedField] = useState(null); // controla qual campo está focado
   const [categoryOpen, setCategoryOpen] = useState(false);
@@ -39,7 +42,10 @@ export default function ItemScreen() {
     { label: "Novo", value: "Novo" },
     { label: "Usado - estado de novo", value: "Usado - estado de novo" },
     { label: "Usado - em boas condições", value: "Usado - em boas condições" },
-    { label: "Usado - em condições razoáveis", value: "Usado - em condições razoáveis" },
+    {
+      label: "Usado - em condições razoáveis",
+      value: "Usado - em condições razoáveis",
+    },
   ]);
 
   const {
@@ -58,23 +64,22 @@ export default function ItemScreen() {
   });
 
   const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: [
-        ImagePicker.MediaTypeOptions.Images,
-        ImagePicker.MediaTypeOptions.Videos,
-      ],
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images", "videos"],
       allowsEditing: true,
       quality: 1,
-      selectionLimit: 0,
+      base64: false,
     });
 
+    console.log(result);
+
     if (!result.canceled) {
-      const selectedImages = result.assets.map((asset) => asset.uri);
-      setImages([...images, ...selectedImages]);
+      const asset = result.assets[0].uri;
+      setImages((prev) => [...prev, asset]); // direto, sem FileSystem
     }
   };
 
-  const user = useSelector(state => state.auth.user);  // Pega o usuário logado do Redux
+  const user = useSelector((state) => state.auth.user); // Pega o usuário logado do Redux
 
   const onSubmit = async (data) => {
     const newItem = {
@@ -83,22 +88,12 @@ export default function ItemScreen() {
       price: parseFloat(data.price),
       images,
       userId: user.id,
+      createdAt: new Date().toISOString(),
     };
 
-    try {
-      const response = await axios.post("http://localhost:3000/product");
-
-      if (response.ok) {
-        Alert.alert("Sucesso", "Item publicado!");
-        reset();
-        setImages([]);
-      } else {
-        Alert.alert("Erro", "Não foi possível publicar.");
-      }
-    } catch (error) {
-      console.error(error);
-      Alert.alert("Erro", "Verifique o servidor.");
-    }
+    dispatch(addProduct(newItem));
+    reset();
+    setImages([]);
 
     console.log(newItem);
     alert("Item criado! Confira o console.");
@@ -180,25 +175,24 @@ export default function ItemScreen() {
           name="category"
           rules={{ required: "A categoria é obrigatória" }}
           render={({ field: { onChange, value } }) => (
-            <View>
-              <DropDownPicker
-                style={styles.pickerContainer}
-                open={categoryOpen}
-                value={value}
-                items={category}
-                setOpen={setCategoryOpen}
-                setValue={onChange}
-                setItems={setCategory}
-                placeholder="Selecione a categoria"
-                listMode="MODAL" // não abre modal, abre inline
-                modalProps={{
-                  animationType: "slide",
-                }}
-                modalAnimationType="slide" // Tipo de animação do modal
-                zIndex={2000}
-                zIndexInverse={2000}
-              />
-            </View>
+            <DropDownPicker
+              style={styles.pickerContainer}
+              open={categoryOpen}
+              value={value}
+              items={category}
+              setOpen={setCategoryOpen}
+              setValue={(callback) => {
+                const newValue = callback(value);
+                onChange(newValue); // <-- aqui atualiza o react-hook-form
+              }}
+              setItems={setCategory}
+              placeholder="Selecione a categoria"
+              listMode="MODAL"
+              modalProps={{ animationType: "slide" }}
+              modalAnimationType="slide"
+              zIndex={2000}
+              zIndexInverse={2000}
+            />
           )}
         />
         {errors.category && (

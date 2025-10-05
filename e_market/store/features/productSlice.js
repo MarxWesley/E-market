@@ -1,62 +1,83 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import productService from "../../services/productService";
-import { set } from "react-hook-form";
 
 // Thunks assync
 
 export const fetchProducts = createAsyncThunk("products/fetchAll", async () => {
-    return await productService.getAllProducts();
-})
+  return await productService.getAllProducts();
+});
 
-export const fetchCategories = createAsyncThunk("product/fetchCategories", async () =>
-    await productService.getCategories()
+export const fetchCategories = createAsyncThunk(
+  "products/fetchCategories",
+  async () => await productService.getCategories()
 );
 
-export const fetchProductById = createAsyncThunk("product/fetchById", async (id) => {
+export const fetchProductById = createAsyncThunk(
+  "products/fetchById",
+  async (id) => {
     await productService.getProductById(id);
-});
+  }
+);
 
-export const fetchProductByTitle = createAsyncThunk("product/fetchByName", async (title) => {
+export const fetchProductByTitle = createAsyncThunk(
+  "products/fetchByName",
+  async (title) => {
     await productService.getProductsByTitle(title);
-});
+  }
+);
 
 export const addProduct = createAsyncThunk("products/add", async (product) => {
-    return await productService.createProduct(product);
-})
-
-export const editProduct = createAsyncThunk("product/edit", async ({ id, productData }) => {
-    await productService.updateProduct(id, productData)
+  return await productService.createProduct(product);
 });
 
-export const removeProduct = createAsyncThunk("product/remove",
-    async (id) => await productService.deleteProduct(id)
+export const editProduct = createAsyncThunk(
+  "products/edit",
+  async ({ id, productData }) => {
+    await productService.updateProduct(id, productData);
+  }
+);
+
+export const removeProduct = createAsyncThunk(
+  "products/remove",
+  async (id) => await productService.deleteProduct(id)
 );
 
 const productSlice = createSlice({
-    name: "product",
-    initialState: {
-        products: [],       // lista de todos os produtos (itens + veículos)
-        productDetail: null, // detalhes de um produto específico
-        categories: [],      // categorias disponíveis
-        loading: false,
-        error: null,
-        success: false,
+  name: "products",
+  initialState: {
+    products: [], // lista de todos os produtos (itens + veículos)
+    productDetail: null, // detalhes de um produto específico
+    categories: [], // categorias disponíveis
+    loading: false,
+    error: null,
+    success: false,
+  },
+  reducers: {
+    resetSuccess: (state) => {
+      state.success = false;
     },
-    reducers: {
-        resetSuccess: (state) => { state.success = false; },
-        clearProductDetail: (state) => { state.productDetail = null; },
+    clearProductDetail: (state) => {
+      state.productDetail = null;
     },
-    extraReducers: (builder) => {
-        builder
-            // 🔹 Buscar todos
-      .addCase(fetchProducts.pending, (state) => { state.loading = true; })
-      .addCase(fetchProducts.fulfilled, (state, action) => {
-        state.loading = false;
-        state.products = action.payload;
+  },
+  extraReducers: (builder) => {
+    builder
+      // 🔹 Buscar todos
+      .addCase(fetchProducts.pending, (state) => {
+        state.products = [];
+        state.loading = true;
+        state.error = null;
       })
-      .addCase(fetchProducts.rejected, (state, action) => {
+      .addCase(fetchProducts.fulfilled, (state, {payload}) => {
+        state.products = payload;
         state.loading = false;
-        state.error = action.error.message;
+        state.error = null;
+      })
+      .addCase(fetchProducts.rejected, (state, {payload}) => {
+        state.error = 'Erro ao buscar produtos';
+        state.loading = false;
+        state.products = [];
+        console.error(payload);
       })
 
       // 🔹 Buscar por ID
@@ -70,10 +91,13 @@ const productSlice = createSlice({
       })
 
       // 🔹 Criar produto
-      .addCase(addProduct.pending, (state) => { state.loading = true; })
-      .addCase(addProduct.fulfilled, (state) => {
+      .addCase(addProduct.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(addProduct.fulfilled, (state, {payload}) => {
         state.loading = false;
         state.success = true;
+        state.products.push(payload);
       })
       .addCase(addProduct.rejected, (state, action) => {
         state.loading = false;
@@ -87,7 +111,7 @@ const productSlice = createSlice({
 
       // 🔹 Excluir produto
       .addCase(removeProduct.fulfilled, (state, action) => {
-        state.products = state.products.filter(p => p.id !== action.meta.arg);
+        state.products = state.products.filter((p) => p.id !== action.meta.arg);
         state.success = true;
       })
 
@@ -96,8 +120,14 @@ const productSlice = createSlice({
         state.categories = action.payload;
       });
   },
+    selectors: {
+      selectAllProducts: (state) => state.products,
+      selectLoading: (state) => state.loading,
+      selectError: (state) => state.error,
+      selectSuccess: (state) => state.success,
+    }
 });
 
-
 export const { resetSuccess, clearProductDetail } = productSlice.actions;
+export const { selectAllProducts, selectLoading, selectError, selectSuccess } = productSlice.selectors;
 export const productReducer = productSlice.reducer;

@@ -29,7 +29,7 @@ const getCategories = async () => {
 // Criar produto
 const createProduct = async (productData) => {
     const response = await axios.post(`${API_URL}/products`, productData, {
-        headers: { "Content-Type": "multipart/form-data" },
+        headers: { "Content-Type": "application/json" },
     });
     return response.data;
 };
@@ -37,7 +37,7 @@ const createProduct = async (productData) => {
 // Editar produto
 const updateProduct = async (id, productData) => {
     const response = await axios.put(`${API_URL}/products/${id}`, productData, {
-        headers: { "Content-Type": "multipart/form-data" },
+        headers: { "Content-Type": "application/json" },
     });
     return response.data;
 };

@@ -1,20 +1,18 @@
 import { View, Text, StyleSheet, FlatList } from "react-native";
 import { useEffect, useState } from "react";
-import axios from "axios";
 import ProductCard from "../components/Card";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchProducts, selectAllProducts, selectError, selectLoading } from "../store/features/productSlice";
 
 export default function MarketplaceScreen() {
-  const [products, setProducts] = useState([]);
+  const dispatch = useDispatch();
+  const products = useSelector(selectAllProducts);
+  const error = useSelector(selectError);
+  const loading = useSelector(selectLoading);
 
   useEffect(() => {
-    axios.get("http://localhost:3000/product")
-      .then(response => {
-        setProducts(response.data);
-      })
-      .catch(err => {
-        console.error("Erro ao buscar produtos:", err);
-      });
-  }, []);
+    dispatch(fetchProducts());
+  }, [dispatch]);
 
   return (
     <View style={styles.container}>
