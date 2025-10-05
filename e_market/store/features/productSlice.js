@@ -7,31 +7,30 @@ export const fetchProducts = createAsyncThunk("products/fetchAll", async () => {
   return await productService.getAllProducts();
 });
 
-export const fetchCategories = createAsyncThunk(
-  "products/fetchCategories",
-  async () => await productService.getCategories()
-);
+export const fetchCategories = createAsyncThunk("products/fetchCategories", async () => {
+  return await productService.getCategories();
+});
 
 export const fetchProductById = createAsyncThunk(
   "products/fetchById",
   async (id) => {
-    await productService.getProductById(id);
+    return await productService.getProductById(id); // faltava o return
   }
 );
 
 export const fetchProductByTitle = createAsyncThunk(
   "products/fetchByName",
   async (title) => {
-    await productService.getProductsByTitle(title);
+    return await productService.getProductsByTitle(title); // faltava o return
   }
 );
 
 export const fetchProductByUserId = createAsyncThunk(
   "products/fetchByUserId",
   async (userId) => {
-    await productService.getProductByUserId(userId);
+    return await productService.getProductByUserId(userId); // faltava o return
   }
-)
+);
 
 export const addProduct = createAsyncThunk("products/add", async (product) => {
   return await productService.createProduct(product);

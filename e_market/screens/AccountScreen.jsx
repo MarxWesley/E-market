@@ -12,10 +12,12 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
+import { logout } from "../store/features/authSlice"
+import DialogComponent from "../components/ui/DialogComponent";
 
 // Ajuste os paths conforme seu projeto
-import authService from '../services/authService';
 import userService from '../services/userService';
+import { useDispatch } from 'react-redux';
 
 export default function AccountScreen() {
   const navigation = useNavigation();
@@ -52,25 +54,14 @@ export default function AccountScreen() {
     }
   };
 
-  const handleLogout = async () => {
-    Alert.alert('Sair', 'Deseja realmente sair da sua conta?', [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Sair',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            if (authService?.logout) await authService.logout();
-            await AsyncStorage.multiRemove(['@token', '@refreshToken', '@user']);
-            navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
-          } catch (e) {
-            console.log('Erro no logout:', e);
-            navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
-          }
-        },
-      },
-    ]);
-  };
+  const  dispatch = useDispatch();
+
+  const [dialogVisible, setDialogVisible] = useState(false);
+
+  const handleConfirmLogout = async () => {
+      dispatch(logout());
+      setDialogVisible(false);
+  }
 
   const menu = [
     { key: 'myClassifieds', icon: 'pricetags-outline', label: 'Meus classificados', onPress: () => navigation.navigate('MyClassifieds') },
@@ -153,11 +144,20 @@ export default function AccountScreen() {
         <View style={{ height: 8 }} />
 
         {/* Botão Sair */}
-        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+        <TouchableOpacity style={styles.logoutBtn} onPress={() => setDialogVisible(true)}>
           <Ionicons name="log-out-outline" size={18} color="#fff" style={{ marginRight: 8 }} />
           <Text style={styles.logoutText}>Sair</Text>
         </TouchableOpacity>
 
+        <DialogComponent
+          visible={dialogVisible}
+          icon="account-remove"
+          title="Deseja realmente sair?"
+          onConfirm={handleConfirmLogout}
+          onDismiss={() => setDialogVisible(false)}
+          textConfirm={"Sim"}
+          textCancel={"Cancelar"}
+        />
         {/* Padding final para não ficar colado em iPhones com gestos */}
         <View style={{ height: 16 }} />
       </ScrollView>
