@@ -20,6 +20,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
 import { addProduct } from "../store/features/productSlice";
 import { useState } from "react";
+import DialogComponent from "../components/ui/DialogComponent";
 
 export default function VehicleScren(params) {
   const dispatch = useDispatch()
@@ -82,6 +83,11 @@ export default function VehicleScren(params) {
     }
   };
 
+  const [dialogVisible, setDialogVisible] = useState(false);
+
+  const showDialog = () => setDialogVisible(true);
+  const hideDialog = () => setDialogVisible(false);
+
   const user = useSelector(state => state.auth.user);
 
   const onSubmit = async (data) => {
@@ -97,6 +103,7 @@ export default function VehicleScren(params) {
     dispatch(addProduct(newVehicle));
     reset();
     setImages([]);
+    showDialog();
     navigation.navigate("MyClassifieds")
 
     console.log(newVehicle);
@@ -344,6 +351,14 @@ export default function VehicleScren(params) {
           >
             <Text style={styles.publishButtonText}>Publicar</Text>
           </TouchableOpacity>
+
+          <DialogComponent
+            visible={dialogVisible}
+            onDismiss={hideDialog}
+            title={"Sucesso !"}
+            message={"Veículo criado com sucesso."}
+            onConfirm={hideDialog}
+          />
         </View>
       </ScrollView>
     </KeyboardAvoidingView>

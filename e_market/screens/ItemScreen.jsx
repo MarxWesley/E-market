@@ -12,7 +12,6 @@ import {
   Alert,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import * as FileSystem from "expo-file-system/legacy";
 import { v4 as uuidv4 } from "uuid";
 import { useForm, Controller } from "react-hook-form";
 import { ImagePlus } from "lucide-react-native";
@@ -20,6 +19,7 @@ import DropDownPicker from "react-native-dropdown-picker";
 import { useDispatch, useSelector } from "react-redux";
 import { addProduct } from "../store/features/productSlice";
 import { useNavigation } from "@react-navigation/native";
+import DialogComponent from "../components/ui/DialogComponent"
 
 export default function ItemScreen() {
   const dispatch = useDispatch();
@@ -81,6 +81,11 @@ export default function ItemScreen() {
     }
   };
 
+  const [dialogVisible, setDialogVisible] = useState(false);
+
+  const showDialog = () => setDialogVisible(true);
+  const hideDialog = () => setDialogVisible(false);
+
   const user = useSelector((state) => state.auth.user); // Pega o usuário logado do Redux
 
   const onSubmit = async (data) => {
@@ -96,10 +101,10 @@ export default function ItemScreen() {
     dispatch(addProduct(newItem));
     reset();
     setImages([]);
+    showDialog();
     navigation.navigate("MyClassifieds")
 
     console.log(newItem);
-    alert("Item criado!");
   };
 
   return (
@@ -260,6 +265,14 @@ export default function ItemScreen() {
           >
             <Text style={styles.publishButtonText}>Publicar</Text>
           </TouchableOpacity>
+
+          <DialogComponent 
+            visible={dialogVisible}
+            onDismiss={hideDialog}
+            title={"Sucesso !"}
+            message={"Item criado com sucesso."}
+            onConfirm={hideDialog}
+          />
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
