@@ -19,9 +19,11 @@ import { ImagePlus } from "lucide-react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import { useDispatch, useSelector } from "react-redux";
 import { addProduct } from "../store/features/productSlice";
+import { useNavigation } from "@react-navigation/native";
 
 export default function ItemScreen() {
   const dispatch = useDispatch();
+  const navigation = useNavigation();
 
   const [images, setImages] = useState([]);
   const [focusedField, setFocusedField] = useState(null); // controla qual campo está focado
@@ -94,9 +96,10 @@ export default function ItemScreen() {
     dispatch(addProduct(newItem));
     reset();
     setImages([]);
+    navigation.navigate("MyClassifieds")
 
     console.log(newItem);
-    alert("Item criado! Confira o console.");
+    alert("Item criado!");
   };
 
   return (
@@ -204,25 +207,26 @@ export default function ItemScreen() {
           name="condition"
           rules={{ required: "A condição é obrigatória" }}
           render={({ field: { onChange, value } }) => (
-            <View>
-              <DropDownPicker
-                style={styles.pickerContainer}
-                open={conditionOpen}
-                value={value}
-                items={condition}
-                setOpen={setConditionOpen}
-                setValue={onChange}
-                setItems={setCondition}
-                placeholder="Selecione a condição"
-                listMode="MODAL" // não abre modal, abre inline
-                modalProps={{
-                  animationType: "slide",
-                }}
-                modalAnimationType="slide" // Tipo de animação do modal
-                zIndex={2000}
-                zIndexInverse={2000}
-              />
-            </View>
+            <DropDownPicker
+              style={styles.pickerContainer}
+              open={conditionOpen}
+              value={value}
+              items={condition}
+              setOpen={setConditionOpen}
+              setValue={(callback) => {
+                const newValue = callback(value);
+                onChange(newValue);
+              }}
+              setItems={setCondition}
+              placeholder="Selecione a condição"
+              listMode="MODAL" // não abre modal, abre inline
+              modalProps={{
+                animationType: "slide",
+              }}
+              modalAnimationType="slide" // Tipo de animação do modal
+              zIndex={2000}
+              zIndexInverse={2000}
+            />
           )}
         />
         {errors.condition && (

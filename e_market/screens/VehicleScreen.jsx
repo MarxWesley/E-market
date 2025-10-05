@@ -16,8 +16,15 @@ import { useForm, Controller, set } from "react-hook-form";
 import { ImagePlus } from "lucide-react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import axios from "axios";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigation } from "@react-navigation/native";
+import { addProduct } from "../store/features/productSlice";
+import { useState } from "react";
 
 export default function VehicleScren(params) {
+  const dispatch = useDispatch()
+  const navigation = useNavigation()
+
   const [images, setImages] = useState([]);
   const [focusedField, setFocusedField] = useState(null); // controla qual campo está focado
 
@@ -60,19 +67,18 @@ export default function VehicleScren(params) {
   });
 
   const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: [
-        ImagePicker.MediaTypeOptions.Images,
-        ImagePicker.MediaTypeOptions.Videos,
-      ],
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images", "videos"],
       allowsEditing: true,
       quality: 1,
-      selectionLimit: 0,
+      base64: false,
     });
 
+    console.log(result);
+
     if (!result.canceled) {
-      const selectedImages = result.assets.map((asset) => asset.uri);
-      setImages([...images, ...selectedImages]);
+      const asset = result.assets[0].uri;
+      setImages((prev) => [...prev, asset]); // direto, sem FileSystem
     }
   };
 
@@ -88,20 +94,10 @@ export default function VehicleScren(params) {
       userId: user.id,
     };
 
-    try {
-      const response = await axios.post("http://localhost:3000/product");
-
-      if (response.ok) {
-        Alert.alert("Sucesso", "Veículo publicado!");
-        reset();
-        setImages([]);
-      } else {
-        Alert.alert("Erro", "Não foi possível publicar.");
-      }
-    } catch (error) {
-      console.error(error);
-      Alert.alert("Erro", "Verifique o servidor.");
-    }
+    dispatch(addProduct(newVehicle));
+    reset();
+    setImages([]);
+    navigation.navigate("MyClassifieds")
 
     console.log(newVehicle);
   };
@@ -113,8 +109,6 @@ export default function VehicleScren(params) {
     >
       <ScrollView
         style={styles.container}
-        keyboardShouldPersistTaps="handled"
-        contentContainerStyle={{ paddingBottom: 100 }}
       >
         {/* adicionar imagem */}
         <View style={styles.imagesContainer}>
@@ -158,31 +152,32 @@ export default function VehicleScren(params) {
           name="type"
           rules={{ required: "O tipo de veículo é obrigatório" }}
           render={({ field: { onChange, value } }) => (
-            <View>
-              <DropDownPicker
-                style={styles.pickerContainer}
-                open={typeOpen}
-                value={value} // ✅ pega valor direto do form
-                items={typeItems}
-                setOpen={setTypeOpen}
-                setValue={onChange} // ✅ atualiza o react-hook-form
-                setItems={setTypeItems}
-                placeholder="Selecione o tipo de veículo"
-                listMode="MODAL" // não abre modal, abre inline
-                modalProps={{
-                  animationType: "slide",
-                }}
-                modalAnimationType="slide" // Tipo de animação do modal
-                modalContentContainerStyle={{
-                  height: "50%",
-                  marginTop: "auto", // faz aparecer na parte inferior
-                  borderTopLeftRadius: 20,
-                  borderTopRightRadius: 20,
-                }}
-                zIndex={3000}
-                zIndexInverse={1000}
-              />
-            </View>
+            <DropDownPicker
+              style={styles.pickerContainer}
+              open={typeOpen}
+              value={value} // ✅ pega valor direto do form
+              items={typeItems}
+              setOpen={setTypeOpen}
+              setValue={(callback) => {
+                const newValue = callback(value);
+                onChange(newValue);
+              }}
+              setItems={setTypeItems}
+              placeholder="Selecione o tipo de veículo"
+              listMode="MODAL" // não abre modal, abre inline
+              modalProps={{
+                animationType: "slide",
+              }}
+              modalAnimationType="slide" // Tipo de animação do modal
+              modalContentContainerStyle={{
+                height: "50%",
+                marginTop: "auto", // faz aparecer na parte inferior
+                borderTopLeftRadius: 20,
+                borderTopRightRadius: 20,
+              }}
+              zIndex={3000}
+              zIndexInverse={1000}
+            />
           )}
         />
         {errors.type && (
@@ -194,25 +189,26 @@ export default function VehicleScren(params) {
           name="year"
           rules={{ required: "O ano é obrigatório" }}
           render={({ field: { onChange, value } }) => (
-            <View>
-              <DropDownPicker
-                style={styles.pickerContainer}
-                open={yearOpen}
-                value={value}
-                items={yearItems}
-                setOpen={setYearOpen}
-                setValue={onChange}
-                setItems={setYearItems}
-                placeholder="Selecione o ano"
-                listMode="MODAL" // não abre modal, abre inline
-                modalProps={{
-                  animationType: "slide",
-                }}
-                modalAnimationType="slide" // Tipo de animação do modal
-                zIndex={2000}
-                zIndexInverse={2000}
-              />
-            </View>
+            <DropDownPicker
+              style={styles.pickerContainer}
+              open={yearOpen}
+              value={value}
+              items={yearItems}
+              setOpen={setYearOpen}
+              setValue={(callback) => {
+                const newValue = callback(value);
+                onChange(newValue);
+              }}
+              setItems={setYearItems}
+              placeholder="Selecione o ano"
+              listMode="MODAL" // não abre modal, abre inline
+              modalProps={{
+                animationType: "slide",
+              }}
+              modalAnimationType="slide" // Tipo de animação do modal
+              zIndex={2000}
+              zIndexInverse={2000}
+            />
           )}
         />
         {errors.year && (

@@ -24,6 +24,7 @@
     "expo-file-system": "^19.0.16",
     "expo-image-picker": "~16.1.4",
     "expo-status-bar": "~2.2.3",
+    "json-server": "^1.0.0-beta.3",
     "lucide-react-native": "^0.544.0",
     "react": "19.0.0",
     "react-dom": "19.0.0",
