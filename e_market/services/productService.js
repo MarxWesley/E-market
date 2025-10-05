@@ -20,10 +20,12 @@ const getProductByUserId = async (userId) => {
     return response.data;
 }
 
-// Buscar produto pelo nome
+// Buscar produtos pelo título (LIKE ignorando maiúsculas/minúsculas)
 const getProductsByTitle = async (title) => {
-    const response = await axios.get(`${API_URL}/products?title=${title}`);
-    return response.data;
+  const response = await axios.get(`${API_URL}/products`);
+  return response.data.filter(product =>
+    product.title.toLowerCase().includes(title.toLowerCase())
+  );
 };
 
 // Buscar categorias
