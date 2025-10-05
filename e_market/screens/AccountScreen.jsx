@@ -1,11 +1,19 @@
-// screens/AccountScreen.jsx
-import React, { useEffect, useState, useCallback } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity, Alert, Switch, FlatList } from 'react-native';
+import React, { useCallback, useState } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  Alert,
+  Switch,
+  ScrollView,
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 
-// Serviços (ajuste os paths se necessário)
+// Ajuste os paths conforme seu projeto
 import authService from '../services/authService';
 import userService from '../services/userService';
 
@@ -15,7 +23,6 @@ export default function AccountScreen() {
   const [darkMode, setDarkMode] = useState(false);
   const [stats, setStats] = useState({ listings: 0, sold: 0, favorites: 0 });
 
-  // Carrega preferências e dados do usuário ao focar na tela
   useFocusEffect(
     useCallback(() => {
       const load = async () => {
@@ -23,13 +30,9 @@ export default function AccountScreen() {
           const theme = await AsyncStorage.getItem('@theme');
           setDarkMode(theme === 'dark');
 
-          // Buscar perfil
-          // Esperado: userService.getProfile() -> { name, email, avatarUrl }
           const profile = await userService?.getProfile?.();
           setUser(profile || { name: 'Usuário', email: 'email@exemplo.com' });
 
-          // Estatísticas (opcional)
-          // Ajuste para o que existir no seu back/productService
           const myStats = await userService?.getStats?.();
           if (myStats) setStats(myStats);
         } catch (e) {
@@ -44,7 +47,6 @@ export default function AccountScreen() {
     try {
       setDarkMode(value);
       await AsyncStorage.setItem('@theme', value ? 'dark' : 'light');
-      // Aqui você pode disparar um contexto/Redux para aplicar tema global
     } catch (e) {
       console.log('Erro ao salvar tema:', e);
     }
@@ -58,17 +60,9 @@ export default function AccountScreen() {
         style: 'destructive',
         onPress: async () => {
           try {
-            // Se existir endpoint de logout, chame:
             if (authService?.logout) await authService.logout();
-
-            // Limpa tokens/sessão
             await AsyncStorage.multiRemove(['@token', '@refreshToken', '@user']);
-
-            // Reseta a navegação para a tela de Login
-            navigation.reset({
-              index: 0,
-              routes: [{ name: 'Login' }],
-            });
+            navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
           } catch (e) {
             console.log('Erro no logout:', e);
             navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
@@ -78,89 +72,95 @@ export default function AccountScreen() {
     ]);
   };
 
-  // Itens da lista de ações
   const menu = [
     { key: 'myClassifieds', icon: 'pricetags-outline', label: 'Meus classificados', onPress: () => navigation.navigate('MyClassifieds') },
-    { key: 'sell',         icon: 'add-circle-outline', label: 'Vender um item',     onPress: () => navigation.navigate('Sell') },
-    { key: 'favorites',    icon: 'heart-outline',      label: 'Favoritos',          onPress: () => navigation.navigate('Favorites') },
-    { key: 'edit',         icon: 'person-outline',     label: 'Editar perfil',      onPress: () => navigation.navigate('EditProfile') },
-    { key: 'address',      icon: 'home-outline',       label: 'Endereços',          onPress: () => navigation.navigate('Addresses') },
-    { key: 'notifications',icon: 'notifications-outline', label: 'Notificações',   onPress: () => navigation.navigate('Notifications') },
-    { key: 'help',         icon: 'chatbubbles-outline',label: 'Ajuda e suporte',    onPress: () => navigation.navigate('Message') },
-    { key: 'about',        icon: 'information-circle-outline', label: 'Sobre o E-market', onPress: () => Alert.alert('Sobre', 'E-market v1.0') },
+    { key: 'sell', icon: 'add-circle-outline', label: 'Vender um item', onPress: () => navigation.navigate('Sell') },
+    { key: 'favorites', icon: 'heart-outline', label: 'Favoritos', onPress: () => navigation.navigate('Favorites') },
+    { key: 'edit', icon: 'person-outline', label: 'Editar perfil', onPress: () => navigation.navigate('EditProfile') },
+    { key: 'address', icon: 'home-outline', label: 'Endereços', onPress: () => navigation.navigate('Addresses') },
+    { key: 'notifications', icon: 'notifications-outline', label: 'Notificações', onPress: () => navigation.navigate('Notifications') },
+    { key: 'help', icon: 'chatbubbles-outline', label: 'Ajuda e suporte', onPress: () => navigation.navigate('Message') },
+    { key: 'about', icon: 'information-circle-outline', label: 'Sobre o E-market', onPress: () => Alert.alert('Sobre', 'E-market v1.0') },
   ];
-
-  const renderItem = ({ item }) => (
-    <TouchableOpacity style={styles.row} onPress={item.onPress}>
-      <View style={styles.rowLeft}>
-        <Ionicons name={item.icon} size={22} color="#3B82F6" style={{ marginRight: 12 }} />
-        <Text style={styles.rowText}>{item.label}</Text>
-      </View>
-      <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
-    </TouchableOpacity>
-  );
 
   return (
     <View style={[styles.container, darkMode && { backgroundColor: '#0B1220' }]}>
-      {/* Cabeçalho */}
-      <View style={[styles.header, darkMode && { backgroundColor: '#111827', borderColor: '#1F2937' }]}>
-        <View style={styles.avatarWrap}>
-          {user?.avatarUrl ? (
-            <Image source={{ uri: user.avatarUrl }} style={styles.avatar} />
-          ) : (
-            <View style={[styles.avatar, styles.avatarFallback]}>
-              <Text style={styles.avatarInitials}>
-                {user?.name ? user.name.split(' ').map(s => s[0]).join('').slice(0, 2).toUpperCase() : 'U'}
-              </Text>
-            </View>
-          )}
-        </View>
-        <View style={{ flex: 1 }}>
-          <Text style={[styles.name, darkMode && { color: '#F9FAFB' }]} numberOfLines={1}>
-            {user?.name || 'Usuário'}
-          </Text>
-          <Text style={[styles.email, darkMode && { color: '#9CA3AF' }]} numberOfLines={1}>
-            {user?.email || 'email@exemplo.com'}
-          </Text>
-        </View>
-        <TouchableOpacity onPress={() => navigation.navigate('EditProfile')}>
-          <Ionicons name="create-outline" size={22} color="#3B82F6" />
-        </TouchableOpacity>
-      </View>
-
-      {/* Estatísticas (opcional) */}
-      <View style={styles.statsRow}>
-        <StatCard label="Anúncios" value={stats.listings} />
-        <StatCard label="Vendidos" value={stats.sold} />
-        <StatCard label="Favoritos" value={stats.favorites} />
-      </View>
-
-      {/* Preferências rápidas */}
-      <View style={styles.card}>
-        <View style={styles.switchRow}>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Ionicons name="moon-outline" size={20} color="#6B7280" style={{ marginRight: 8 }} />
-            <Text style={styles.switchText}>Tema escuro</Text>
+      <ScrollView
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Cabeçalho */}
+        <View style={[styles.header, darkMode && { backgroundColor: '#111827', borderColor: '#1F2937' }]}>
+          <View style={styles.avatarWrap}>
+            {user?.avatarUrl ? (
+              <Image source={{ uri: user.avatarUrl }} style={styles.avatar} />
+            ) : (
+              <View style={[styles.avatar, styles.avatarFallback]}>
+                <Text style={styles.avatarInitials}>
+                  {user?.name ? user.name.split(' ').map(s => s[0]).join('').slice(0, 2).toUpperCase() : 'U'}
+                </Text>
+              </View>
+            )}
           </View>
-          <Switch value={darkMode} onValueChange={onToggleTheme} />
+          <View style={{ flex: 1 }}>
+            <Text style={[styles.name, darkMode && { color: '#F9FAFB' }]} numberOfLines={1}>
+              {user?.name || 'Usuário'}
+            </Text>
+            <Text style={[styles.email, darkMode && { color: '#9CA3AF' }]} numberOfLines={1}>
+              {user?.email || 'email@exemplo.com'}
+            </Text>
+          </View>
+          <TouchableOpacity onPress={() => navigation.navigate('EditProfile')}>
+            <Ionicons name="create-outline" size={22} color="#3B82F6" />
+          </TouchableOpacity>
         </View>
-      </View>
 
-      {/* Menu principal */}
-      <View style={styles.card}>
-        <FlatList
-          data={menu}
-          renderItem={renderItem}
-          keyExtractor={(item) => item.key}
-          ItemSeparatorComponent={() => <View style={styles.separator} />}
-        />
-      </View>
+        {/* Estatísticas */}
+        <View style={styles.statsRow}>
+          <StatCard label="Anúncios" value={stats.listings} />
+          <StatCard label="Vendidos" value={stats.sold} />
+          <StatCard label="Favoritos" value={stats.favorites} />
+        </View>
 
-      {/* Botão Sair */}
-      <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
-        <Ionicons name="log-out-outline" size={18} color="#fff" style={{ marginRight: 8 }} />
-        <Text style={styles.logoutText}>Sair</Text>
-      </TouchableOpacity>
+        {/* Preferências */}
+        <View style={styles.card}>
+          <View style={styles.switchRow}>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Ionicons name="moon-outline" size={20} color="#6B7280" style={{ marginRight: 8 }} />
+              <Text style={styles.switchText}>Tema escuro</Text>
+            </View>
+            <Switch value={darkMode} onValueChange={onToggleTheme} />
+          </View>
+        </View>
+
+        {/* Menu principal */}
+        <View style={styles.card}>
+          {menu.map((item, index) => (
+            <View key={item.key}>
+              <TouchableOpacity style={styles.row} onPress={item.onPress}>
+                <View style={styles.rowLeft}>
+                  <Ionicons name={item.icon} size={22} color="#3B82F6" style={{ marginRight: 12 }} />
+                  <Text style={styles.rowText}>{item.label}</Text>
+                </View>
+                <Ionicons name="chevron-forward" size={18} color="#9CA3AF" />
+              </TouchableOpacity>
+              {index < menu.length - 1 && <View style={styles.separator} />}
+            </View>
+          ))}
+        </View>
+
+        {/* Espaço para o botão não colar no rodapé em telas pequenas */}
+        <View style={{ height: 8 }} />
+
+        {/* Botão Sair */}
+        <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+          <Ionicons name="log-out-outline" size={18} color="#fff" style={{ marginRight: 8 }} />
+          <Text style={styles.logoutText}>Sair</Text>
+        </TouchableOpacity>
+
+        {/* Padding final para não ficar colado em iPhones com gestos */}
+        <View style={{ height: 16 }} />
+      </ScrollView>
     </View>
   );
 }
@@ -175,7 +175,8 @@ function StatCard({ label, value }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F3F4F6', padding: 16 },
+  container: { flex: 1, backgroundColor: '#F3F4F6' },
+  scrollContent: { padding: 16, paddingBottom: 24 },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -228,7 +229,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#EF4444',
     paddingVertical: 14,
     borderRadius: 12,
-    marginTop: 'auto',
   },
   logoutText: { color: '#fff', fontSize: 16, fontWeight: '700' },
 });
