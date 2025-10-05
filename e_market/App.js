@@ -21,9 +21,9 @@ import MessageScreen from "./screens/MessageScreen";
 import AccountScreen from "./screens/AccountScreen";
 
 // Extras (fora do tab) — vieram da main
-import ItemScreen from "./screens/ItemScreen";
-import VehicleScreen from "./screens/VehicleScreen";
+import CreateVehicleScreen from "./screens/CreateVehicleScreen";
 import MyClassifieds from "./screens/MyClassifieds";
+import CreateItemScreen from "./screens/CreateItemScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -67,13 +67,13 @@ function RootNavigator() {
 
           {/* Telas extras sem tab bar (mesmo padrão da main) */}
           <Stack.Screen
-            name="ItemScreen"
-            component={ItemScreen}
+            name="CreateItemScreen"
+            component={CreateItemScreen}
             options={{ headerShown: true, title: "Novo Item" }}
           />
           <Stack.Screen
-            name="VehicleScreen"
-            component={VehicleScreen}
+            name="CreateVehicleScreen"
+            component={CreateVehicleScreen}
             options={{ headerShown: true, title: "Novo Veículo" }}
           />
           <Stack.Screen

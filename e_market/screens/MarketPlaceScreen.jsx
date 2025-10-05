@@ -16,7 +16,7 @@ export default function MarketplaceScreen() {
 
   return (
     <View style={styles.container}>
-
+      
       {products && products.length > 0 ? (
         <FlatList
           data={products}

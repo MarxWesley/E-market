@@ -8,7 +8,7 @@ const ProductCard = ({ title, price, images }) => {
         <TouchableOpacity style={styles.card}>
             <View >
                 {firstImage ? (
-                    <Image source={{ uri: firstImage }} style={styles.image} resizeMode="cover" />
+                    <Image source={{ uri: firstImage }} style={styles.image} resizeMode="cover" alt='imagens de itens a venda' aria-hidden='true'/>
                 ) : (
                     <View style={[styles.image, styles.placeholder]} />
                 )}

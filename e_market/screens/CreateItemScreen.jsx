@@ -1,3 +1,4 @@
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -12,42 +13,42 @@ import {
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { v4 as uuidv4 } from "uuid";
-import { useForm, Controller, set } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { ImagePlus } from "lucide-react-native";
 import DropDownPicker from "react-native-dropdown-picker";
-import axios from "axios";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigation } from "@react-navigation/native";
 import { addProduct } from "../store/features/productSlice";
-import { useState } from "react";
-import DialogComponent from "../components/ui/DialogComponent";
+import { useNavigation } from "@react-navigation/native";
+import DialogComponent from "../components/ui/DialogComponent"
 
-export default function VehicleScren(params) {
-  const dispatch = useDispatch()
-  const navigation = useNavigation()
+export default function CreateItemScreen() {
+  const dispatch = useDispatch();
+  const navigation = useNavigation();
 
   const [images, setImages] = useState([]);
   const [focusedField, setFocusedField] = useState(null); // controla qual campo está focado
+  const [categoryOpen, setCategoryOpen] = useState(false);
+  const [conditionOpen, setConditionOpen] = useState(false);
 
-  const [typeOpen, setTypeOpen] = useState(false);
-  const [yearOpen, setYearOpen] = useState(false);
-
-  const [typeItems, setTypeItems] = useState([
-    { label: "Carros e caminhões", value: "Carros e caminhões" },
-    { label: "Motocicletas", value: "Motocicletas" },
-    { label: "Barcos", value: "Barcos" },
+  const [category, setCategory] = useState([
+    { label: "Roupas", value: "Roupas" },
+    { label: "Eletrônicos", value: "Eletrônicos" },
+    { label: "Móveis", value: "Móveis" },
+    { label: "Entretenimento", value: "Entretenimento" },
+    { label: "Esporte", value: "Esporte" },
+    { label: "Casa e jardim", value: "Casa e jardim" },
     { label: "Outro", value: "Outro" },
   ]);
 
-  const currentYear = new Date().getFullYear();
-  const years = Array.from(
-    { length: currentYear - 1980 + 1 },
-    (_, i) => currentYear - i
-  );
-
-  const [yearItems, setYearItems] = useState(
-    years.map((year) => ({ label: year.toString(), value: year }))
-  );
+  const [condition, setCondition] = useState([
+    { label: "Novo", value: "Novo" },
+    { label: "Usado - estado de novo", value: "Usado - estado de novo" },
+    { label: "Usado - em boas condições", value: "Usado - em boas condições" },
+    {
+      label: "Usado - em condições razoáveis",
+      value: "Usado - em condições razoáveis",
+    },
+  ]);
 
   const {
     control,
@@ -57,12 +58,9 @@ export default function VehicleScren(params) {
   } = useForm({
     defaultValues: {
       title: "",
-      type: "",
-      year: "",
-      brand: "",
-      model: "",
-      mileage: "",
       price: "",
+      category: "",
+      condition: "",
       description: "",
     },
   });
@@ -88,25 +86,25 @@ export default function VehicleScren(params) {
   const showDialog = () => setDialogVisible(true);
   const hideDialog = () => setDialogVisible(false);
 
-  const user = useSelector(state => state.auth.user);
+  const user = useSelector((state) => state.auth.user); // Pega o usuário logado do Redux
 
   const onSubmit = async (data) => {
-    const newVehicle = {
+    const newItem = {
       id: uuidv4(),
       ...data,
       price: parseFloat(data.price),
-      category: "veiculos",
       images,
       userId: user.id,
+      createdAt: new Date().toISOString(),
     };
 
-    dispatch(addProduct(newVehicle));
+    dispatch(addProduct(newItem));
     reset();
     setImages([]);
     showDialog();
     navigation.navigate("MyClassifieds")
 
-    console.log(newVehicle);
+    console.log(newItem);
   };
 
   return (
@@ -114,10 +112,7 @@ export default function VehicleScren(params) {
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <ScrollView
-        style={styles.container}
-      >
-        {/* adicionar imagem */}
+      <ScrollView style={styles.container}>
         <View style={styles.imagesContainer}>
           {images.map((uri, index) => (
             <Image key={index} source={{ uri }} style={styles.image} />
@@ -153,147 +148,6 @@ export default function VehicleScren(params) {
         {errors.title && (
           <Text style={styles.errorText}>{errors.title.message}</Text>
         )}
-        {/* Tipo */}
-        <Controller
-          control={control}
-          name="type"
-          rules={{ required: "O tipo de veículo é obrigatório" }}
-          render={({ field: { onChange, value } }) => (
-            <DropDownPicker
-              style={styles.pickerContainer}
-              open={typeOpen}
-              value={value} // ✅ pega valor direto do form
-              items={typeItems}
-              setOpen={setTypeOpen}
-              setValue={(callback) => {
-                const newValue = callback(value);
-                onChange(newValue);
-              }}
-              setItems={setTypeItems}
-              placeholder="Selecione o tipo de veículo"
-              listMode="MODAL" // não abre modal, abre inline
-              modalProps={{
-                animationType: "slide",
-              }}
-              modalAnimationType="slide" // Tipo de animação do modal
-              modalContentContainerStyle={{
-                height: "50%",
-                marginTop: "auto", // faz aparecer na parte inferior
-                borderTopLeftRadius: 20,
-                borderTopRightRadius: 20,
-              }}
-              zIndex={3000}
-              zIndexInverse={1000}
-            />
-          )}
-        />
-        {errors.type && (
-          <Text style={styles.errorText}>{errors.type.message}</Text>
-        )}
-        {/* Ano */}
-        <Controller
-          control={control}
-          name="year"
-          rules={{ required: "O ano é obrigatório" }}
-          render={({ field: { onChange, value } }) => (
-            <DropDownPicker
-              style={styles.pickerContainer}
-              open={yearOpen}
-              value={value}
-              items={yearItems}
-              setOpen={setYearOpen}
-              setValue={(callback) => {
-                const newValue = callback(value);
-                onChange(newValue);
-              }}
-              setItems={setYearItems}
-              placeholder="Selecione o ano"
-              listMode="MODAL" // não abre modal, abre inline
-              modalProps={{
-                animationType: "slide",
-              }}
-              modalAnimationType="slide" // Tipo de animação do modal
-              zIndex={2000}
-              zIndexInverse={2000}
-            />
-          )}
-        />
-        {errors.year && (
-          <Text style={styles.errorText}>{errors.year.message}</Text>
-        )}
-        {/* Fabricante */}
-        <Controller
-          control={control}
-          name="brand"
-          rules={{ required: "O fabricante é obrigatório" }}
-          render={({ field: { onChange, value } }) => (
-            <TextInput
-              placeholder="Fabricante"
-              style={[
-                styles.input,
-                focusedField === "brand" && { borderColor: "#319BE5" },
-              ]}
-              value={value}
-              onChangeText={onChange}
-              onFocus={() => setFocusedField("brand")}
-              onBlur={() => setFocusedField(null)}
-            />
-          )}
-        />
-        {errors.title && (
-          <Text style={styles.errorText}>{errors.brand.message}</Text>
-        )}
-        {/* Modelo */}
-        <Controller
-          control={control}
-          name="model"
-          rules={{ required: "O modelo é obrigatório" }}
-          render={({ field: { onChange, value } }) => (
-            <TextInput
-              placeholder="Modelo"
-              style={[
-                styles.input,
-                focusedField === "model" && { borderColor: "#319BE5" },
-              ]}
-              value={value}
-              onChangeText={onChange}
-              onFocus={() => setFocusedField("model")}
-              onBlur={() => setFocusedField(null)}
-            />
-          )}
-        />
-        {errors.model && (
-          <Text style={styles.errorText}>{errors.model.message}</Text>
-        )}
-        {/* Quilometragem */}
-        <Controller
-          control={control}
-          name="mileage"
-          rules={{
-            required: "A quilometragem é obrigatória",
-            pattern: {
-              value: /^\d+$/,
-              message: "Digite uma quilometragem válida",
-            },
-          }}
-          render={({ field: { onChange, value } }) => (
-            <TextInput
-              placeholder="Quilometragem"
-              style={[
-                styles.input,
-                focusedField === "mileage" && { borderColor: "#319BE5" },
-              ]}
-              value={value}
-              onChangeText={onChange}
-              onFocus={() => setFocusedField("mileage")}
-              onBlur={() => setFocusedField(null)}
-              keyboardType="numeric"
-            />
-          )}
-        />
-        {errors.mileage && (
-          <Text style={styles.errorText}>{errors.mileage.message}</Text>
-        )}
         {/* Preço */}
         <Controller
           control={control}
@@ -323,6 +177,66 @@ export default function VehicleScren(params) {
         {errors.price && (
           <Text style={styles.errorText}>{errors.price.message}</Text>
         )}
+        {/* Categoria */}
+        <Controller
+          control={control}
+          name="category"
+          rules={{ required: "A categoria é obrigatória" }}
+          render={({ field: { onChange, value } }) => (
+            <DropDownPicker
+              style={styles.pickerContainer}
+              open={categoryOpen}
+              value={value}
+              items={category}
+              setOpen={setCategoryOpen}
+              setValue={(callback) => {
+                const newValue = callback(value);
+                onChange(newValue); // <-- aqui atualiza o react-hook-form
+              }}
+              setItems={setCategory}
+              placeholder="Selecione a categoria"
+              listMode="MODAL"
+              modalProps={{ animationType: "slide" }}
+              modalAnimationType="slide"
+              zIndex={2000}
+              zIndexInverse={2000}
+            />
+          )}
+        />
+        {errors.category && (
+          <Text style={styles.errorText}>{errors.category.message}</Text>
+        )}
+        {/* Condição */}
+        <Controller
+          control={control}
+          name="condition"
+          rules={{ required: "A condição é obrigatória" }}
+          render={({ field: { onChange, value } }) => (
+            <DropDownPicker
+              style={styles.pickerContainer}
+              open={conditionOpen}
+              value={value}
+              items={condition}
+              setOpen={setConditionOpen}
+              setValue={(callback) => {
+                const newValue = callback(value);
+                onChange(newValue);
+              }}
+              setItems={setCondition}
+              placeholder="Selecione a condição"
+              listMode="MODAL" // não abre modal, abre inline
+              modalProps={{
+                animationType: "slide",
+              }}
+              modalAnimationType="slide" // Tipo de animação do modal
+              zIndex={2000}
+              zIndexInverse={2000}
+            />
+          )}
+        />
+        {errors.condition && (
+          <Text style={styles.errorText}>{errors.condition.message}</Text>
+        )}
         {/* Descrição */}
         <Controller
           control={control}
@@ -344,7 +258,7 @@ export default function VehicleScren(params) {
           )}
         />
         {/* Botão Publicar */}
-        <View style={{ marginBottom: 30 }}>
+        <View style={{ marginBottom: 30, justifyContent: "center" }}>
           <TouchableOpacity
             style={styles.publishButton}
             onPress={handleSubmit(onSubmit)}
@@ -352,11 +266,11 @@ export default function VehicleScren(params) {
             <Text style={styles.publishButtonText}>Publicar</Text>
           </TouchableOpacity>
 
-          <DialogComponent
+          <DialogComponent 
             visible={dialogVisible}
             onDismiss={hideDialog}
             title={"Sucesso !"}
-            message={"Veículo criado com sucesso."}
+            message={"Item criado com sucesso."}
             onConfirm={hideDialog}
           />
         </View>
