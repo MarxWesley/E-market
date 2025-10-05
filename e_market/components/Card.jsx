@@ -32,13 +32,14 @@ const styles = StyleSheet.create({
         overflow: 'hidden',
     },
     image: {
-        width: 204,
+        width: "100%",
         height: 164,
     },
     placeholder: {
         backgroundColor: '#fff',
     },
     textContainer: {
+        height: 10,
         paddingHorizontal: 8,
         paddingTop: 4,
     },

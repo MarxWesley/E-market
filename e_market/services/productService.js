@@ -14,6 +14,12 @@ const getProductById = async (id) => {
     return response.data;
 };
 
+//buscar produtos pelo ID do usuário
+const getProductByUserId = async (userId) => {
+    const response = await axios.get(`${API_URL}/products?userId=${userId}`);
+    return response.data;
+}
+
 // Buscar produto pelo nome
 const getProductsByTitle = async (title) => {
     const response = await axios.get(`${API_URL}/products?title=${title}`);
@@ -57,4 +63,5 @@ export default {
     updateProduct,
     deleteProduct,
     getCategories,
+    getProductByUserId,
 }

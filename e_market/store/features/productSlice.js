@@ -26,6 +26,13 @@ export const fetchProductByTitle = createAsyncThunk(
   }
 );
 
+export const fetchProductByUserId = createAsyncThunk(
+  "products/fetchByUserId",
+  async (userId) => {
+    await productService.getProductByUserId(userId);
+  }
+)
+
 export const addProduct = createAsyncThunk("products/add", async (product) => {
   return await productService.createProduct(product);
 });
@@ -45,13 +52,15 @@ export const removeProduct = createAsyncThunk(
 const productSlice = createSlice({
   name: "products",
   initialState: {
-    products: [], // lista de todos os produtos (itens + veículos)
-    productDetail: null, // detalhes de um produto específico
-    categories: [], // categorias disponíveis
+    products: [],       // todos os produtos
+    userProducts: [],   // só do usuário logado
+    productDetail: null,
+    categories: [],
     loading: false,
     error: null,
     success: false,
   },
+
   reducers: {
     resetSuccess: (state) => {
       state.success = false;
@@ -68,12 +77,12 @@ const productSlice = createSlice({
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchProducts.fulfilled, (state, {payload}) => {
+      .addCase(fetchProducts.fulfilled, (state, { payload }) => {
         state.products = payload;
         state.loading = false;
         state.error = null;
       })
-      .addCase(fetchProducts.rejected, (state, {payload}) => {
+      .addCase(fetchProducts.rejected, (state, { payload }) => {
         state.error = 'Erro ao buscar produtos';
         state.loading = false;
         state.products = [];
@@ -85,6 +94,11 @@ const productSlice = createSlice({
         state.productDetail = action.payload;
       })
 
+      // 🔹 Buscar por userID
+      .addCase(fetchProductByUserId.fulfilled, (state, action) => {
+        state.userProducts = action.payload;
+      })
+
       // 🔹 Buscar por nome
       .addCase(fetchProductByTitle.fulfilled, (state, action) => {
         state.products = action.payload;
@@ -94,7 +108,7 @@ const productSlice = createSlice({
       .addCase(addProduct.pending, (state) => {
         state.loading = true;
       })
-      .addCase(addProduct.fulfilled, (state, {payload}) => {
+      .addCase(addProduct.fulfilled, (state, { payload }) => {
         state.loading = false;
         state.success = true;
         state.products.push(payload);
@@ -120,12 +134,12 @@ const productSlice = createSlice({
         state.categories = action.payload;
       });
   },
-    selectors: {
-      selectAllProducts: (state) => state.products,
-      selectLoading: (state) => state.loading,
-      selectError: (state) => state.error,
-      selectSuccess: (state) => state.success,
-    }
+  selectors: {
+    selectAllProducts: (state) => state.products,
+    selectLoading: (state) => state.loading,
+    selectError: (state) => state.error,
+    selectSuccess: (state) => state.success,
+  }
 });
 
 export const { resetSuccess, clearProductDetail } = productSlice.actions;

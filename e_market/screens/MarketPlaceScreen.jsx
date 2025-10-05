@@ -16,7 +16,7 @@ export default function MarketplaceScreen() {
 
   return (
     <View style={styles.container}>
-      
+
       {products && products.length > 0 ? (
         <FlatList
           data={products}
@@ -29,7 +29,7 @@ export default function MarketplaceScreen() {
             />
           )}
           numColumns={2}
-          columnWrapperStyle={{ justifyContent: 'space-between', marginBottom: 2, gap: 2 }}
+          columnWrapperStyle={{ justifyContent: 'flex-start', marginBottom: 2, gap: 2 }}
         />
       ) : (
         <Text>Carregando produtos...</Text>
