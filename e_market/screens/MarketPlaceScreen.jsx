@@ -8,9 +8,13 @@ import {
   selectError,
   selectLoading,
 } from "../store/features/productSlice";
+import { useNavigation } from "@react-navigation/native";
+import Loading from "../components/ui/loading";
 
 export default function MarketplaceScreen() {
   const dispatch = useDispatch();
+  const navigation = useNavigation();
+
   const products = useSelector(selectAllProducts);
   const error = useSelector(selectError);
   const loading = useSelector(selectLoading);
@@ -46,7 +50,9 @@ export default function MarketplaceScreen() {
       />
 
       {loading ? (
-        <Text>Carregando produtos...</Text>
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+          <Loading />
+        </View>
       ) : filteredProducts && filteredProducts.length > 0 ? (
         <FlatList
           data={filteredProducts}
@@ -56,13 +62,16 @@ export default function MarketplaceScreen() {
               title={item.title}
               price={item.price}
               images={item.images}
+              onPress={() => navigation.navigate("ItemDetailScreen", { products: item })}
             />
           )}
           numColumns={2}
           columnWrapperStyle={{ justifyContent: "flex-start", marginBottom: 2, gap: 2 }}
         />
       ) : (
-        <Text>Nenhum produto encontrado.</Text>
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+          <Text style={{fontSize: 20, fontWeight: 400}}>Nenhum produto encontrado!</Text>
+        </View>
       )}
     </View>
   );

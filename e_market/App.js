@@ -24,6 +24,7 @@ import AccountScreen from "./screens/AccountScreen";
 import CreateVehicleScreen from "./screens/CreateVehicleScreen";
 import MyClassifieds from "./screens/MyClassifieds";
 import CreateItemScreen from "./screens/CreateItemScreen";
+import ItemDetailScreen from "./screens/ItemDetailScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -80,6 +81,11 @@ function RootNavigator() {
             name="MyClassifieds"
             component={MyClassifieds}
             options={{ headerShown: true, title: "Meus Classificados" }}
+          />
+          <Stack.Screen
+            name="ItemDetailScreen"
+            component={ItemDetailScreen}
+            options={{ headerShown: true, title: "Detalhes" }}
           />
         </>
       ) : (

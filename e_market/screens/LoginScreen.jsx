@@ -17,6 +17,7 @@ import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "../store/features/authSlice"; // thunk
+import { Eye, EyeOff } from "lucide-react-native";
 
 const PRIMARY = "#2F87E1";
 
@@ -115,7 +116,7 @@ export default function LoginScreen() {
                   accessibilityRole="button"
                   accessibilityLabel={show ? "Ocultar senha" : "Mostrar senha"}
                 >
-                  <Text style={{ fontSize: 16 }}>{show ? "🙈" : "👁️"}</Text>
+                  <Text style={{ fontSize: 16 }}>{show ? <EyeOff color={"#808080"}/> : <Eye color={"#808080"}/>}</Text>
                 </TouchableOpacity>
                 {errors.senha && (
                   <Text style={styles.errorText}>{errors.senha.message}</Text>

@@ -1,11 +1,11 @@
 import { Dimensions, TouchableOpacity } from 'react-native';
 import { View, Text, Image, StyleSheet } from 'react-native';
 
-const ProductCard = ({ title, price, images }) => {
+const ProductCard = ({ title, price, images, onPress }) => {
     const firstImage = images && images.length > 0 ? images[0] : null;
 
     return (
-        <TouchableOpacity style={styles.card}>
+        <TouchableOpacity style={styles.card} onPress={onPress}>
             <View >
                 {firstImage ? (
                     <Image source={{ uri: firstImage }} style={styles.image} resizeMode="cover" alt='imagens de itens a venda' aria-hidden='true'/>

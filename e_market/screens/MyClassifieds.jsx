@@ -32,7 +32,9 @@ export default function MyClassifieds() {
                     columnWrapperStyle={{ justifyContent: 'space-between', marginBottom: 2, gap: 2 }}
                 />
             ) : (
-                <Text>Carregando produtos...</Text>
+                <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+                    <Text style={{fontSize: 20, fontWeight: 500}}>Sem classificados no momento!</Text>
+                </View>
             )}
         </View>
     );

@@ -18,6 +18,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "../store/features/authSlice";
 import userService from "../services/userService";
+import { Eye, EyeOff } from "lucide-react-native";
 
 const PRIMARY = "#2F87E1";
 
@@ -183,7 +184,7 @@ export default function RegisterScreen() {
                     onPress={() => setShowPass((s) => !s)}
                   >
                     <Text style={{ fontSize: 16 }}>
-                      {showPass ? "🙈" : "👁️"}
+                      {showPass ? <EyeOff color={"#808080"}/> : <Eye color={"#808080"}/>}
                     </Text>
                   </TouchableOpacity>
                   {errors.senha && (
@@ -214,7 +215,7 @@ export default function RegisterScreen() {
                     onPress={() => setShowConf((s) => !s)}
                   >
                     <Text style={{ fontSize: 16 }}>
-                      {showConf ? "🙈" : "👁️"}
+                      {showConf ? <EyeOff color={"#808080"}/> : <Eye color={"#808080"}/>}
                     </Text>
                   </TouchableOpacity>
                   {errors.confirmarSenha && (
