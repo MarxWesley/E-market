@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   StyleSheet,
   KeyboardAvoidingView,
@@ -18,6 +17,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "../store/features/authSlice"; // thunk
 import { Eye, EyeOff } from "lucide-react-native";
+import { TextInput } from 'react-native-paper';
 
 const PRIMARY = "#2F87E1";
 
@@ -82,13 +82,14 @@ export default function LoginScreen() {
             render={({ field: { onChange, onBlur, value } }) => (
               <View style={styles.inputWrap}>
                 <TextInput
-                  style={[styles.input, errors.email && styles.inputError]}
+                  style={[errors.email && styles.inputError]}
                   placeholder="Email"
                   keyboardType="email-address"
                   autoCapitalize="none"
                   onBlur={onBlur}
                   onChangeText={onChange}
                   value={value}
+                  mode="outlined"
                 />
                 {errors.email && (
                   <Text style={styles.errorText}>{errors.email.message}</Text>
@@ -103,12 +104,13 @@ export default function LoginScreen() {
             render={({ field: { onChange, onBlur, value } }) => (
               <View style={styles.inputWrap}>
                 <TextInput
-                  style={[styles.input, errors.senha && styles.inputError]}
+                  style={[errors.senha && styles.inputError]}
                   placeholder="Senha"
                   secureTextEntry={!show}
                   onBlur={onBlur}
                   onChangeText={onChange}
                   value={value}
+                  mode="outlined"
                 />
                 <TouchableOpacity
                   onPress={() => setShow((s) => !s)}

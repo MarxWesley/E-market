@@ -1,4 +1,4 @@
-import React, { use, useEffect, useState } from "react";
+import React, { use, useEffect, useEffectEvent, useState } from "react";
 import {
   View,
   Text,
@@ -12,7 +12,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useDispatch, useSelector } from "react-redux";
-import { addFavorite, removeFavorite } from "../store/features/favoriteSlice";
+import { addFavorite, fetchFavoritesByUserId, removeFavorite } from "../store/features/favoriteSlice";
 import { v4 as uuidv4 } from "uuid";
 
 const { width, height } = Dimensions.get("window");
@@ -21,32 +21,49 @@ export default function ItemDetailScreen({ route }) {
   const [isSaved, setIsSaved] = useState(false);
   const [visible, setVisible] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(0);
-  const favorites = useSelector((state) => state.favorites || []);
+  const favorites = useSelector((state) => state.favorites.favorites || []);
 
   const dispatch = useDispatch();
 
   const { products } = route.params;
   const user = useSelector((state) => state.auth.user);
 
+  useEffect(() => {
+    if (!user) return;
+    const saved = favorites.some(
+      (fav) => fav.productId === products.id && fav.userId === user.id
+    );
+    setIsSaved(saved);
+  }, [favorites, products.id, user]);
+
+
+  useEffect(() => {
+    if (user?.id) {
+      dispatch(fetchFavoritesByUserId(user.id));
+    }
+  }, [user]);
+
   const toggleFavorite = async () => {
     if (!user) return;
 
-    const id = uuidv4();
-    const userId = user.id;
-    const productId = products.id;
-
-    const alreadySaved = favorites.some(
-      (fav) => fav.productId === productId && fav.userId === userId
+    const existingFavorite = favorites.find(
+      (fav) => fav.productId === products.id && fav.userId === user.id
     );
 
-    if (alreadySaved) {
-      await dispatch(removeFavorite({ userId, productId })); // id não precisa, JSON Server remove pelo filtro
+    if (existingFavorite) {
+      await dispatch(removeFavorite(existingFavorite.id));
       setIsSaved(false);
     } else {
-      await dispatch(addFavorite({ id, userId, productId }));
+      const newFavorite = {
+        id: uuidv4(),
+        userId: user.id,
+        productId: products.id,
+      };
+      await dispatch(addFavorite(newFavorite));
       setIsSaved(true);
     }
   };
+
 
   return (
     <ScrollView style={styles.container}>

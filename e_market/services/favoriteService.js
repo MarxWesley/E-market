@@ -2,7 +2,7 @@ import api from "./api";
 
 const getFavoriteByUserId = async (userId) => {
   try {
-    const response = await api.get(`/favorites/${userId}`);
+    const response = await api.get(`/favorites?userId=${userId}`);
     return response.data;
   } catch (error) {
     console.error("Error fetching favorite items:", error);
@@ -10,20 +10,14 @@ const getFavoriteByUserId = async (userId) => {
   }
 };
 
-const addFavorite = async ({ id, userId, productId }) => {
-  const response = await api.post(`/favorites`, { id, userId, productId });
+const addFavorite = async (favorite) => {
+  const response = await api.post(`/favorites`, favorite);
   return response.data;
 };
 
-const removeFavorite = async ({userId, productId }) => {
-  const res = await api.get(
-    `/favorites?userId=${userId}&productId=${productId}`
-  );
-  if (res.data.length > 0) {
-    await api.delete(`/favorites/${res.data[0].id}`);
-    return res.data[0].id;
-  }
-  return null;
+const removeFavorite = async (id) => {
+  const response = await api.delete(`/favorites/${id}`);
+  return response.data;
 };
 
 export default {
