@@ -121,12 +121,12 @@ export default function ItemDetailScreen({ route }) {
       {/* ações */}
       <View style={styles.actionsContainer}>
         <TouchableOpacity style={styles.actionButton}>
-          <Ionicons name="chatbubble-ellipses-outline" size={30} color="#333" />
+          <Ionicons name="chatbubble-ellipses-outline" size={30} color="#319BE5" />
           <Text style={styles.actionText}>Enviar{"\n"}mensagem</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.actionButton}>
-          <Ionicons name="share-outline" size={30} color="#333" />
+          <Ionicons name="share-outline" size={30} color="#319BE5" />
           <Text style={styles.actionText}>Compartilhar</Text>
         </TouchableOpacity>
 

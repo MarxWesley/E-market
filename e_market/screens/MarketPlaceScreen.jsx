@@ -19,8 +19,6 @@ export default function MarketplaceScreen() {
   const error = useSelector(selectError);
   const loading = useSelector(selectLoading);
 
-  const [focusedField, setFocusedField] = useState(null); 
-
   const [searchQuery, setSearchQuery] = useState("");
   const [filteredProducts, setFilteredProducts] = useState([]);
 

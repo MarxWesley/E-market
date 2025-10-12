@@ -20,6 +20,8 @@ import { useNavigation } from "@react-navigation/native";
 import { addProduct } from "../store/features/productSlice";
 import { useState } from "react";
 import DialogComponent from "../components/ui/DialogComponent";
+import { MaskedTextInput } from "react-native-mask-text";
+import CurrencyInput from "react-native-currency-input";
 
 export default function CreateVehicleScren(params) {
   const dispatch = useDispatch()
@@ -33,6 +35,7 @@ export default function CreateVehicleScren(params) {
 
   const [typeItems, setTypeItems] = useState([
     { label: "Carros e caminhões", value: "Carros e caminhões" },
+    { label: "Caminonetes", value: "Caminonetes" },
     { label: "Motocicletas", value: "Motocicletas" },
     { label: "Barcos", value: "Barcos" },
     { label: "Outro", value: "Outro" },
@@ -297,6 +300,7 @@ export default function CreateVehicleScren(params) {
         <Controller
           control={control}
           name="price"
+          defaultValue={0}
           rules={{
             required: "O preço é obrigatório",
             pattern: {
@@ -305,17 +309,22 @@ export default function CreateVehicleScren(params) {
             },
           }}
           render={({ field: { onChange, value } }) => (
-            <TextInput
+            <CurrencyInput
               placeholder="Preço"
               style={[
                 styles.input,
                 focusedField === "price" && { borderColor: "#319BE5" },
               ]}
               value={value}
-              onChangeText={onChange}
+              onChangeValue={onChange}
               onFocus={() => setFocusedField("price")}
               onBlur={() => setFocusedField(null)}
               keyboardType="numeric"
+              prefix="R$ "
+              delimiter="."
+              separator=","
+              precision={2}
+              minValue={0}
             />
           )}
         />

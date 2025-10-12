@@ -1,7 +1,8 @@
+import { Pencil, Trash } from 'lucide-react-native';
 import { Dimensions, TouchableOpacity } from 'react-native';
 import { View, Text, Image, StyleSheet } from 'react-native';
 
-const ProductCard = ({ title, price, images, onPress }) => {
+const ProductCard = ({ title, price, images, onPress, showActions, onEdit, onDelete }) => {
     const firstImage = images && images.length > 0 ? images[0] : null;
 
     return (
@@ -12,6 +13,18 @@ const ProductCard = ({ title, price, images, onPress }) => {
                 ) : (
                     <View style={[styles.image, styles.placeholder]} />
                 )}
+
+                {showActions && (
+                    <View style={styles.actionsContainer}>
+                        <TouchableOpacity onPress={onEdit}>
+                            <Pencil size={22} color="#3f3f3fff"/>
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={onDelete}>
+                            <Trash size={22} color="#3f3f3fff"/>
+                        </TouchableOpacity>
+                    </View>
+                )}
+
                 <View style={styles.textContainer}>
                     <Text style={styles.title}>{title}</Text>
                     <Text style={styles.price}>R${price}</Text>
@@ -52,6 +65,16 @@ const styles = StyleSheet.create({
         color: '#000000',
         fontWeight: 'bold',
     },
+    actionsContainer: {
+    position: "absolute",
+    top: 10,
+    right: 6,
+    flexDirection: "row",
+    gap: 8,
+    backgroundColor: "#ffffffff",
+    padding: 3,
+    borderRadius: 5,
+  },
 });
 
 export default ProductCard;
