@@ -1,3 +1,4 @@
+// screens/AccountScreen.jsx
 import React, { useCallback, useState } from 'react';
 import {
   View, Text, StyleSheet, Image, TouchableOpacity, Alert, Switch, ScrollView,
@@ -5,19 +6,31 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { logout } from '../store/features/authSlice';
 import DialogComponent from '../components/ui/DialogComponent';
 import userService from '../services/userService';
 
+const getInitials = (name) =>
+  (name || 'U')
+    .trim()
+    .split(/\s+/)
+    .map(s => s[0])
+    .join('')
+    .slice(0, 2)
+    .toUpperCase();
+
 export default function AccountScreen() {
   const navigation = useNavigation();
   const dispatch = useDispatch();
-  const insets = useSafeAreaInsets(); // 👈 pega altura segura do rodapé
+  const insets = useSafeAreaInsets();
 
-  const [user, setUser] = useState(null);
+  // Redux primeiro
+  const authUser = useSelector((s) => s.auth.user);
+
+  const [user, setUser] = useState(authUser || null);
   const [darkMode, setDarkMode] = useState(false);
   const [stats, setStats] = useState({ listings: 0, sold: 0, favorites: 0 });
   const [dialogVisible, setDialogVisible] = useState(false);
@@ -26,12 +39,27 @@ export default function AccountScreen() {
     useCallback(() => {
       const load = async () => {
         try {
+          // tema salvo
           const theme = await AsyncStorage.getItem('@theme');
           setDarkMode(theme === 'dark');
 
-          const profile = await userService?.getProfile?.();
-          setUser(profile || { name: 'Usuário', email: 'email@exemplo.com' });
+          // 1) Redux
+          if (authUser?.email) {
+            setUser(authUser);
+          } else {
+            // 2) AsyncStorage
+            const raw = await AsyncStorage.getItem('@user');
+            if (raw) {
+              const stored = JSON.parse(raw);
+              setUser(stored);
+            } else {
+              // 3) API (fallback)
+              const profile = await userService?.getProfile?.();
+              setUser(profile || { name: 'Usuário', email: 'email@exemplo.com' });
+            }
+          }
 
+          // estatísticas (se existir no back)
           const myStats = await userService?.getStats?.();
           if (myStats) setStats(myStats);
         } catch (e) {
@@ -39,7 +67,7 @@ export default function AccountScreen() {
         }
       };
       load();
-    }, [])
+    }, [authUser])
   );
 
   const onToggleTheme = async (value) => {
@@ -54,6 +82,8 @@ export default function AccountScreen() {
   const handleConfirmLogout = async () => {
     dispatch(logout());
     setDialogVisible(false);
+    // Se preferir forçar a tela de login, descomente:
+    // navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
   };
 
   const menu = [
@@ -69,7 +99,7 @@ export default function AccountScreen() {
   return (
     <SafeAreaView style={[styles.container, darkMode && { backgroundColor: '#0B1220' }]} edges={['bottom']}>
       <ScrollView
-        contentContainerStyle={[styles.scrollContent, { paddingBottom: 120 }]} // espaço pro footer
+        contentContainerStyle={[styles.scrollContent, { paddingBottom: 120 }]}
         showsVerticalScrollIndicator={false}
       >
         {/* Cabeçalho */}
@@ -79,9 +109,7 @@ export default function AccountScreen() {
               <Image source={{ uri: user.avatarUrl }} style={styles.avatar} />
             ) : (
               <View style={[styles.avatar, styles.avatarFallback]}>
-                <Text style={styles.avatarInitials}>
-                  {user?.name ? user.name.split(' ').map(s => s[0]).join('').slice(0, 2).toUpperCase() : 'U'}
-                </Text>
+                <Text style={styles.avatarInitials}>{getInitials(user?.name)}</Text>
               </View>
             )}
           </View>
@@ -195,23 +223,13 @@ const styles = StyleSheet.create({
   switchRow: { padding: 14, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   switchText: { fontSize: 15, color: '#111827' },
 
-  /** Footer fixo */
   footer: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,           // cola no rodapé
-    paddingHorizontal: 16,
-    backgroundColor: 'transparent',
+    position: 'absolute', left: 0, right: 0, bottom: 0,
+    paddingHorizontal: 16, backgroundColor: 'transparent',
   },
-
   logoutBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#EF4444',
-    paddingVertical: 14,
-    borderRadius: 12,
+    flexDirection: 'row', alignItems: 'center', justifyContent: 'center',
+    backgroundColor: '#EF4444', paddingVertical: 14, borderRadius: 12,
   },
   logoutText: { color: '#fff', fontSize: 16, fontWeight: '700' },
 });

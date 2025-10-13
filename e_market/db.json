@@ -34,6 +34,27 @@
       "email": "teste@teste.com",
       "cpf": "05599999999",
       "senha": "123456"
+    },
+    {
+      "id": "00bb",
+      "nome": "Pedro Vinicius",
+      "email": "pedro@pedro.com",
+      "cpf": "11223421323",
+      "senha": "123456"
+    },
+    {
+      "id": "e481",
+      "nome": "Pedro Vinícius",
+      "email": "pedro@1.com",
+      "cpf": "12345678999",
+      "senha": "123456"
+    },
+    {
+      "id": "9cd9",
+      "nome": "Wesley Marks",
+      "email": "wesley@1.com",
+      "cpf": "12345678999",
+      "senha": "123456"
     }
   ],
   "products": [
