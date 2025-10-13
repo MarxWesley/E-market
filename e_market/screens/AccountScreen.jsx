@@ -105,7 +105,7 @@ export default function AccountScreen() {
           <StatCard label="Favoritos" value={stats.favorites} />
         </View>
 
-        {/* Preferências */}
+        {/* Preferências //tema dark
         <View style={styles.card}>
           <View style={styles.switchRow}>
             <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -114,7 +114,7 @@ export default function AccountScreen() {
             </View>
             <Switch value={darkMode} onValueChange={onToggleTheme} />
           </View>
-        </View>
+        </View> */}
 
         {/* Menu principal */}
         <View style={styles.card}>
