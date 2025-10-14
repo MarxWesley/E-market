@@ -111,7 +111,7 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || "Falha no login";
+        state.error = action.payload || "Falha no Login";
       })
 
       // hidratação
