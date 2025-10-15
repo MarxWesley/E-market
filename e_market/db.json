@@ -34,6 +34,27 @@
       "email": "teste@teste.com",
       "cpf": "05599999999",
       "senha": "123456"
+    },
+    {
+      "id": "00bb",
+      "nome": "Pedro Vinicius",
+      "email": "pedro@pedro.com",
+      "cpf": "11223421323",
+      "senha": "123456"
+    },
+    {
+      "id": "e481",
+      "nome": "Pedro Vinícius",
+      "email": "pedro@1.com",
+      "cpf": "12345678999",
+      "senha": "123456"
+    },
+    {
+      "id": "9cd9",
+      "nome": "Wesley Marks",
+      "email": "wesley@1.com",
+      "cpf": "12345678999",
+      "senha": "123456"
     }
   ],
   "products": [
@@ -77,6 +98,11 @@
       "id": "9d805ed2-19e5-4045-a067-2a57c7dc948a",
       "userId": "1",
       "productId": "d103cd03-6492-4297-aeab-dfc798addfd8"
+    },
+    {
+      "id": "00575155-6f0d-4968-8d51-8778f73ea796",
+      "userId": "1",
+      "productId": "b4076386-3639-4cb6-a9b9-c8ac29c38ada"
     }
   ]
 }

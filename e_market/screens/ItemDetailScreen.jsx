@@ -136,7 +136,7 @@ export default function ItemDetailScreen({ route }) {
             size={30}
             color={isSaved ? "#319BE5" : "#319BE5"}
           />
-          <Text style={styles.actionText}>Salvar</Text>
+          <Text style={styles.actionText}>Favoritar</Text>
         </TouchableOpacity>
       </View>
 

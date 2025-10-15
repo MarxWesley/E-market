@@ -17,7 +17,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "../store/features/authSlice"; // thunk
 import { Eye, EyeOff } from "lucide-react-native";
-import { TextInput } from 'react-native-paper';
+import { TextInput } from "react-native-paper";
 
 const PRIMARY = "#2F87E1";
 
@@ -46,11 +46,12 @@ export default function LoginScreen() {
 
   const onSubmit = async ({ email, senha }) => {
     try {
-      // dispara a thunk e aguarda; se falhar, lança (por causa do unwrap)
-      await dispatch(loginUser({ email, senha })).unwrap();
-      // sucesso: RootNavigator vai detectar token no Redux e trocar para AppTabs
+      // normaliza email
+      const safeEmail = email.trim().toLowerCase();
+      await dispatch(loginUser({ email: safeEmail, senha })).unwrap();
+      // Sucesso: RootNavigator troca para AppTabs ao detectar token no Redux
     } catch (e) {
-      // mostra erro nos campos (sem poluir a UI)
+      // Feedback de credenciais inválidas (mantém layout limpo)
       setError("email", { message: "Credenciais inválidas" });
       setError("senha", { message: " " });
     }
@@ -64,7 +65,7 @@ export default function LoginScreen() {
       <ImageBackground
         source={require("../assets/background.png")}
         resizeMode="cover"
-        style={{ flex: 1, width: "100%", height: "100%", justifyContent: "center" , alignItems: "center"}}
+        style={{ flex: 1, width: "100%", height: "100%", justifyContent: "center", alignItems: "center" }}
       >
         <View style={styles.card}>
           {/* Logo */}
@@ -75,6 +76,7 @@ export default function LoginScreen() {
               resizeMode="contain"
             />
           </View>
+
           {/* Email */}
           <Controller
             name="email"
@@ -82,14 +84,20 @@ export default function LoginScreen() {
             render={({ field: { onChange, onBlur, value } }) => (
               <View style={styles.inputWrap}>
                 <TextInput
-                  style={[errors.email && styles.inputError]}
-                  placeholder="Email"
-                  keyboardType="email-address"
-                  autoCapitalize="none"
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  value={value}
                   mode="outlined"
+                  placeholder="Email"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  keyboardType="email-address"
+                  textContentType="emailAddress"
+                  returnKeyType="next"
+                  editable={!loading}
+                  error={!!errors.email}
+                  style={[errors.email && styles.inputError]}
+                  onSubmitEditing={() => {}}
                 />
                 {errors.email && (
                   <Text style={styles.errorText}>{errors.email.message}</Text>
@@ -97,6 +105,7 @@ export default function LoginScreen() {
               </View>
             )}
           />
+
           {/* Senha */}
           <Controller
             name="senha"
@@ -104,21 +113,27 @@ export default function LoginScreen() {
             render={({ field: { onChange, onBlur, value } }) => (
               <View style={styles.inputWrap}>
                 <TextInput
-                  style={[errors.senha && styles.inputError]}
-                  placeholder="Senha"
-                  secureTextEntry={!show}
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  value={value}
                   mode="outlined"
+                  placeholder="Senha"
+                  value={value}
+                  onChangeText={onChange}
+                  onBlur={onBlur}
+                  secureTextEntry={!show}
+                  textContentType="password"
+                  returnKeyType="done"
+                  editable={!loading}
+                  error={!!errors.senha}
+                  style={[errors.senha && styles.inputError]}
+                  onSubmitEditing={handleSubmit(onSubmit)}
                 />
                 <TouchableOpacity
                   onPress={() => setShow((s) => !s)}
                   style={styles.eye}
+                  disabled={loading}
                   accessibilityRole="button"
                   accessibilityLabel={show ? "Ocultar senha" : "Mostrar senha"}
                 >
-                  <Text style={{ fontSize: 16 }}>{show ? <EyeOff color={"#808080"}/> : <Eye color={"#808080"}/>}</Text>
+                  {show ? <EyeOff color={"#808080"} /> : <Eye color={"#808080"} />}
                 </TouchableOpacity>
                 {errors.senha && (
                   <Text style={styles.errorText}>{errors.senha.message}</Text>
@@ -126,32 +141,30 @@ export default function LoginScreen() {
               </View>
             )}
           />
+
           {/* Erro global vindo do servidor */}
           {!!error && (
-            <Text
-              style={[
-                styles.errorText,
-                { textAlign: "center", marginBottom: 8 },
-              ]}
-            >
+            <Text style={[styles.errorText, { textAlign: "center", marginBottom: 8 }]}>
               {error}
             </Text>
           )}
+
           <TouchableOpacity>
             <Text style={styles.forgot}>Esqueci minha senha</Text>
           </TouchableOpacity>
+
           <TouchableOpacity
             style={[styles.button, loading && { opacity: 0.6 }]}
             onPress={handleSubmit(onSubmit)}
             disabled={loading}
           >
-            <Text style={styles.buttonText}>
-              {loading ? "Entrando..." : "Entrar"}
-            </Text>
+            <Text style={styles.buttonText}>{loading ? "Entrando..." : "Entrar"}</Text>
           </TouchableOpacity>
+
           <TouchableOpacity
             style={styles.secondaryButton}
             onPress={() => navigation.navigate("Register")}
+            disabled={loading}
           >
             <Text style={styles.secondaryText}>Criar conta</Text>
           </TouchableOpacity>
@@ -173,9 +186,7 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 20,
     width: "90%",
-    // Centraliza o card na tela
     alignSelf: "center",
-    // Sombra (iOS)
     shadowColor: "#000",
     shadowOpacity: 0.1,
     shadowRadius: 12,
@@ -184,23 +195,14 @@ const styles = StyleSheet.create({
   logoRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center", // centraliza horizontalmente
+    justifyContent: "center",
     gap: 10,
     marginBottom: 18,
   },
   inputWrap: { marginBottom: 12 },
-  input: {
-    borderWidth: 1,
-    borderColor: "#d9d9d9",
-    borderRadius: 10,
-    padding: 12,
-    paddingRight: 44,
-    fontSize: 16,
-    backgroundColor: "#fff",
-  },
   inputError: { borderColor: "#e74c3c" },
   errorText: { color: "#e74c3c", marginTop: 6, fontSize: 13 },
-  eye: { position: "absolute", right: 12, top: 12 },
+  eye: { position: "absolute", right: 16, top: 22 },
   forgot: { alignSelf: "flex-end", color: "#666", marginBottom: 14 },
   button: {
     backgroundColor: PRIMARY,
