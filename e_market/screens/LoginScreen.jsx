@@ -9,6 +9,7 @@ import {
   Platform,
   Image,
   ImageBackground,
+  TextInput,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useForm, Controller } from "react-hook-form";
@@ -17,7 +18,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "../store/features/authSlice"; // thunk
 import { Eye, EyeOff } from "lucide-react-native";
-import { TextInput } from "react-native-paper";
+// import { TextInput } from "react-native-paper";
 
 const PRIMARY = "#2F87E1";
 
@@ -65,7 +66,13 @@ export default function LoginScreen() {
       <ImageBackground
         source={require("../assets/background.png")}
         resizeMode="cover"
-        style={{ flex: 1, width: "100%", height: "100%", justifyContent: "center", alignItems: "center" }}
+        style={{
+          flex: 1,
+          width: "100%",
+          height: "100%",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
       >
         <View style={styles.card}>
           {/* Logo */}
@@ -96,7 +103,7 @@ export default function LoginScreen() {
                   returnKeyType="next"
                   editable={!loading}
                   error={!!errors.email}
-                  style={[errors.email && styles.inputError]}
+                  style={[styles.input, errors.senha && styles.inputError]}
                   onSubmitEditing={() => {}}
                 />
                 {errors.email && (
@@ -123,7 +130,7 @@ export default function LoginScreen() {
                   returnKeyType="done"
                   editable={!loading}
                   error={!!errors.senha}
-                  style={[errors.senha && styles.inputError]}
+                  style={[styles.input, errors.senha && styles.inputError]}
                   onSubmitEditing={handleSubmit(onSubmit)}
                 />
                 <TouchableOpacity
@@ -133,7 +140,11 @@ export default function LoginScreen() {
                   accessibilityRole="button"
                   accessibilityLabel={show ? "Ocultar senha" : "Mostrar senha"}
                 >
-                  {show ? <EyeOff color={"#808080"} /> : <Eye color={"#808080"} />}
+                  {show ? (
+                    <EyeOff color={"#808080"} />
+                  ) : (
+                    <Eye color={"#808080"} />
+                  )}
                 </TouchableOpacity>
                 {errors.senha && (
                   <Text style={styles.errorText}>{errors.senha.message}</Text>
@@ -144,7 +155,12 @@ export default function LoginScreen() {
 
           {/* Erro global vindo do servidor */}
           {!!error && (
-            <Text style={[styles.errorText, { textAlign: "center", marginBottom: 8 }]}>
+            <Text
+              style={[
+                styles.errorText,
+                { textAlign: "center", marginBottom: 8 },
+              ]}
+            >
               {error}
             </Text>
           )}
@@ -158,7 +174,9 @@ export default function LoginScreen() {
             onPress={handleSubmit(onSubmit)}
             disabled={loading}
           >
-            <Text style={styles.buttonText}>{loading ? "Entrando..." : "Entrar"}</Text>
+            <Text style={styles.buttonText}>
+              {loading ? "Entrando..." : "Entrar"}
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -199,10 +217,19 @@ const styles = StyleSheet.create({
     gap: 10,
     marginBottom: 18,
   },
+  input: {
+    borderWidth: 1,
+    borderColor: "#d9d9d9",
+    borderRadius: 10,
+    padding: 12,
+    paddingRight: 44,
+    fontSize: 16,
+    backgroundColor: "#fff",
+  },
   inputWrap: { marginBottom: 12 },
   inputError: { borderColor: "#e74c3c" },
   errorText: { color: "#e74c3c", marginTop: 6, fontSize: 13 },
-  eye: { position: "absolute", right: 16, top: 22 },
+  eye: { position: "absolute", right: 16, top: 13 },
   forgot: { alignSelf: "flex-end", color: "#666", marginBottom: 14 },
   button: {
     backgroundColor: PRIMARY,

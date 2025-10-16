@@ -88,7 +88,7 @@ export default function AccountScreen() {
 
   const menu = [
     { key: 'myClassifieds', icon: 'pricetags-outline', label: 'Meus classificados', onPress: () => navigation.navigate('MyClassifieds') },
-    { key: 'favorites', icon: 'heart-outline', label: 'Favoritos', onPress: () => navigation.navigate('Favorites') },
+    { key: 'favorites', icon: 'heart-outline', label: 'Favoritos', onPress: () => navigation.navigate('FavoriteScreen') },
     { key: 'edit', icon: 'person-outline', label: 'Editar perfil', onPress: () => navigation.navigate('EditProfile') },
     { key: 'address', icon: 'home-outline', label: 'Endereços', onPress: () => navigation.navigate('Addresses') },
     { key: 'notifications', icon: 'notifications-outline', label: 'Notificações', onPress: () => navigation.navigate('Notifications') },

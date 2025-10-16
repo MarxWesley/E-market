@@ -26,6 +26,7 @@ import MyClassifieds from "./screens/MyClassifieds";
 import CreateItemScreen from "./screens/CreateItemScreen";
 import ItemDetailScreen from "./screens/ItemDetailScreen";
 import EditItemScreen from "./screens/EditItemScreen";
+import FavoriteScreen from "./screens/FavoriteScreen";
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -92,6 +93,11 @@ function RootNavigator() {
             name="EditItemScreen"
             component={EditItemScreen}
             options={{ headerShown: true, title: "Editar" }}
+          />
+          <Stack.Screen
+            name="FavoriteScreen"
+            component={FavoriteScreen}
+            options={{ headerShown: true, title: "Favoritos" }}
           />
         </>
       ) : (
