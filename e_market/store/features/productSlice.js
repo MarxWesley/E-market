@@ -7,9 +7,12 @@ export const fetchProducts = createAsyncThunk("products/fetchAll", async () => {
   return await productService.getAllProducts();
 });
 
-export const fetchCategories = createAsyncThunk("products/fetchCategories", async () => {
-  return await productService.getCategories();
-});
+export const fetchCategories = createAsyncThunk(
+  "products/fetchCategories",
+  async () => {
+    return await productService.getCategories();
+  }
+);
 
 export const fetchProductById = createAsyncThunk(
   "products/fetchById",
@@ -38,8 +41,8 @@ export const addProduct = createAsyncThunk("products/add", async (product) => {
 
 export const editProduct = createAsyncThunk(
   "products/edit",
-  async ({ id, productData }) => {
-    await productService.updateProduct(id, productData);
+  async ({ id, ...productData }) => {
+    return await productService.updateProduct(id, productData);
   }
 );
 
@@ -51,8 +54,8 @@ export const removeProduct = createAsyncThunk(
 const productSlice = createSlice({
   name: "products",
   initialState: {
-    products: [],       // todos os produtos
-    userProducts: [],   // só do usuário logado
+    products: [], // todos os produtos
+    userProducts: [], // só do usuário logado
     productDetail: null,
     categories: [],
     loading: false,
@@ -82,7 +85,7 @@ const productSlice = createSlice({
         state.error = null;
       })
       .addCase(fetchProducts.rejected, (state, { payload }) => {
-        state.error = 'Erro ao buscar produtos';
+        state.error = "Erro ao buscar produtos";
         state.loading = false;
         state.products = [];
         console.error(payload);
@@ -118,7 +121,9 @@ const productSlice = createSlice({
       })
 
       // 🔹 Editar produto
-      .addCase(editProduct.fulfilled, (state) => {
+      .addCase(editProduct.fulfilled, (state, { payload }) => {
+        const index = state.products.findIndex((p) => p.id === payload.id);
+        if (index !== -1) state.products[index] = payload;
         state.success = true;
       })
 
@@ -138,9 +143,10 @@ const productSlice = createSlice({
     selectLoading: (state) => state.loading,
     selectError: (state) => state.error,
     selectSuccess: (state) => state.success,
-  }
+  },
 });
 
 export const { resetSuccess, clearProductDetail } = productSlice.actions;
-export const { selectAllProducts, selectLoading, selectError, selectSuccess } = productSlice.selectors;
+export const { selectAllProducts, selectLoading, selectError, selectSuccess } =
+  productSlice.selectors;
 export const productReducer = productSlice.reducer;

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -17,11 +17,13 @@ import { useForm, Controller } from "react-hook-form";
 import { ImagePlus } from "lucide-react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import { useDispatch, useSelector } from "react-redux";
-import { addProduct } from "../store/features/productSlice";
+import { addProduct, editProduct } from "../store/features/productSlice";
 import { useNavigation } from "@react-navigation/native";
 import DialogComponent from "../components/ui/DialogComponent"
 
-export default function CreateItemScreen() {
+export default function CreateItemScreen({ route }) {
+  const { mode, data } = route.params || {};
+
   const dispatch = useDispatch();
   const navigation = useNavigation();
 
@@ -88,9 +90,25 @@ export default function CreateItemScreen() {
 
   const user = useSelector((state) => state.auth.user); // Pega o usuário logado do Redux
 
+  useEffect(() => {
+    if (mode === "edit" && data) {
+      reset({
+        title: data.title,
+        price: data.price.toString(),
+        category: data.category,
+        condition: data.condition,
+        description: data.description,
+        userId: data.userId,
+        createdAt: data.createdAt,
+        id: data.id,
+      });
+      setImages(data.images || []);
+    }
+  }, [mode, data, reset]);
+
   const onSubmit = async (data) => {
-    const newItem = {
-      id: uuidv4(),
+    const itemData = {
+      id: mode === "edit" ? data.id : uuidv4(),
       ...data,
       price: parseFloat(data.price),
       images,
@@ -98,13 +116,21 @@ export default function CreateItemScreen() {
       createdAt: new Date().toISOString(),
     };
 
-    dispatch(addProduct(newItem));
-    reset();
-    setImages([]);
-    showDialog();
-    navigation.navigate("MyClassifieds")
+    try {
+      if (mode === "edit") {
+        await dispatch(editProduct({id: itemData.id, ...itemData}));
+      }else {
+        await dispatch(addProduct(itemData));
+        reset();
+        setImages([]); 
+      }
 
-    console.log(newItem);
+      setDialogVisible(true);
+      navigation.goBack();
+    } catch (error) {
+      console.error("Erro", "Houve um erro ao salvar o item. Tente novamente.");
+    }
+    console.log(itemData);
   };
 
   return (
@@ -263,14 +289,19 @@ export default function CreateItemScreen() {
             style={styles.publishButton}
             onPress={handleSubmit(onSubmit)}
           >
-            <Text style={styles.publishButtonText}>Publicar</Text>
+            <Text style={styles.publishButtonText}>
+              {mode === "edit" ? "Salvar Alterações" : "Publicar"}
+            </Text>
           </TouchableOpacity>
 
           <DialogComponent 
             visible={dialogVisible}
             onDismiss={hideDialog}
-            title={"Sucesso !"}
-            message={"Item criado com sucesso."}
+            title={
+              mode === "edit"
+                ? "Item alterado com sucesso."
+                : "Item criado com sucesso."
+            }
             onConfirm={hideDialog}
           />
         </View>
@@ -333,8 +364,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#319BE5",
     padding: 15,
     borderRadius: 8,
-    lignItems: "center",
+    alignItems: "center",
     marginTop: 10,
+    textAlign: "center",
   },
   publishButtonText: {
     color: "#fff",

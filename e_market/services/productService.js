@@ -42,7 +42,7 @@ const createProduct = async (productData) => {
 
 // Editar produto
 const updateProduct = async (id, productData) => {
-    const response = await api.put(`/products/${id}`, productData, {
+    const response = await api.patch(`/products/${id}`, productData, {
         headers: { "Content-Type": "application/json" },
     });
     return response.data;

@@ -37,6 +37,14 @@ export default function MyClassifieds() {
     }
   };
 
+  const handleEdit = (item) => {
+    if (item.category === "veiculos") {
+      navigation.navigate("CreateVehicleScreen", { mode: "edit", data: item });
+    } else {
+      navigation.navigate("CreateItemScreen", { mode: "edit", data: item });
+    }
+  };
+
   return (
     <View style={styles.container}>
       {userProducts && userProducts.length > 0 ? (
@@ -49,6 +57,7 @@ export default function MyClassifieds() {
               price={item.price}
               images={item.images}
               showActions
+              onEdit={() => handleEdit(item)}
               onDelete={() => handleOpenDialog(item.id)} // 👈 passa o ID certo
               onPress={() =>
                 navigation.navigate("ItemDetailScreen", { products: item })

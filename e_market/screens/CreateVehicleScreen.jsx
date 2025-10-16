@@ -17,15 +17,18 @@ import { ImagePlus } from "lucide-react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
-import { addProduct } from "../store/features/productSlice";
-import { useState } from "react";
+import { addProduct, editProduct } from "../store/features/productSlice";
+import { use, useEffect, useState } from "react";
 import DialogComponent from "../components/ui/DialogComponent";
 import { MaskedTextInput } from "react-native-mask-text";
 import CurrencyInput from "react-native-currency-input";
 
-export default function CreateVehicleScren(params) {
-  const dispatch = useDispatch()
-  const navigation = useNavigation()
+export default function CreateVehicleScren({ route }) {
+  const { mode, data } = route.params || {};
+
+  const dispatch = useDispatch();
+  const navigation = useNavigation();
+  const user = useSelector((state) => state.auth.user);
 
   const [images, setImages] = useState([]);
   const [focusedField, setFocusedField] = useState(null); // controla qual campo está focado
@@ -69,6 +72,25 @@ export default function CreateVehicleScren(params) {
     },
   });
 
+  useEffect(() => {
+    if (mode === "edit" && data) {
+      reset({
+        title: data.title || "",
+        type: data.type || "",
+        year: data.year || "",
+        brand: data.brand || "",
+        model: data.model || "",
+        mileage: data.mileage ? data.mileage.toString() : "",
+        price: data.price || "0",
+        description: data.description || "",
+        userId: data.userId || "",
+        id: data.id || "",
+        createdAt: data.createdAt || "",
+      });
+      setImages(data.images || []);
+    }
+  }, [mode, data, reset]);
+
   const pickImage = async () => {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ["images", "videos"],
@@ -87,28 +109,34 @@ export default function CreateVehicleScren(params) {
 
   const [dialogVisible, setDialogVisible] = useState(false);
 
-  const showDialog = () => setDialogVisible(true);
-  const hideDialog = () => setDialogVisible(false);
-
-  const user = useSelector(state => state.auth.user);
-
-  const onSubmit = async (data) => {
-    const newVehicle = {
-      id: uuidv4(),
-      ...data,
-      price: parseFloat(data.price),
+  const onSubmit = async (formData) => {
+    const vehicleData = {
+      id: mode === "edit" ? formData.id : uuidv4(),
+      ...formData,
+      model: formData.model.toUpperCase(),
+      brand: formData.brand.toUpperCase(),
+      price: parseFloat(formData.price),
       category: "veiculos",
       images,
       userId: user.id,
+      createdAt: new Date().toISOString(),
     };
 
-    dispatch(addProduct(newVehicle));
-    reset();
-    setImages([]);
-    showDialog();
-    navigation.navigate("MyClassifieds")
+    try {
+      if (mode === "edit") {
+        await dispatch(editProduct({ id: vehicleData.id, ...vehicleData }));
+      } else {
+        await dispatch(addProduct(vehicleData));
+        reset();
+        setImages([]);
+      }
 
-    console.log(newVehicle);
+      setDialogVisible(true);
+      navigation.goBack();
+    } catch (error) {
+      console.error("Erro ao salvar veículo:", error);
+    }
+    console.log(vehicleData);
   };
 
   return (
@@ -116,9 +144,7 @@ export default function CreateVehicleScren(params) {
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <ScrollView
-        style={styles.container}
-      >
+      <ScrollView style={styles.container}>
         {/* adicionar imagem */}
         <View style={styles.imagesContainer}>
           {images.map((uri, index) => (
@@ -357,15 +383,20 @@ export default function CreateVehicleScren(params) {
             style={styles.publishButton}
             onPress={handleSubmit(onSubmit)}
           >
-            <Text style={styles.publishButtonText}>Publicar</Text>
+            <Text style={styles.publishButtonText}>
+              {mode === "edit" ? "Salvar Alterações" : "Publicar"}
+            </Text>
           </TouchableOpacity>
 
           <DialogComponent
             visible={dialogVisible}
-            onDismiss={hideDialog}
-            title={"Sucesso !"}
-            message={"Veículo criado com sucesso."}
-            onConfirm={hideDialog}
+            onDismiss={() => setDialogVisible(false)}
+            title={
+              mode === "edit"
+                ? "Veículo alterado com sucesso."
+                : "Veículo criado com sucesso."
+            }
+            onConfirm={() => setDialogVisible(false)}
           />
         </View>
       </ScrollView>
@@ -427,13 +458,15 @@ const styles = StyleSheet.create({
     backgroundColor: "#319BE5",
     padding: 15,
     borderRadius: 8,
-    lignItems: "center",
+    alignItems: "center",
     marginTop: 10,
+    textAlign: "center",
   },
   publishButtonText: {
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
+    textAlign: "center",
   },
   errorText: {
     color: "red",
