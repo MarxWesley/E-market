@@ -27,11 +27,9 @@
       "senha": "123456"
     },
     {
-      "id": "29a8",
-      "nome": "Teste Marques",
+      "name": "Teste Marques",
       "email": "teste@teste.com",
-      "cpf": "05599999999",
-      "senha": "123456"
+      "id": "29a8"
     },
     {
       "id": "00bb",

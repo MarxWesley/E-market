@@ -324,7 +324,7 @@ const styles = StyleSheet.create({
     padding: 12, backgroundColor: "#F3F4F6",
   },
   button: {
-    backgroundColor: "#EF4444", // se preferir azul, troque para PRIMARY
+    backgroundColor: PRIMARY, // se preferir azul, troque para PRIMARY
     borderRadius: 10,
     paddingVertical: 14,
     alignItems: "center",
