@@ -8,6 +8,7 @@ import auth from "./features/authSlice";
 import { userReducer } from "./features/userSlice";
 import { productReducer } from "./features/productSlice";
 import { favoriteReducer } from "./features/favoriteSlice";
+import { addressReducer } from "./features/addressSlice";
 
 export const store = configureStore({
   reducer: {
@@ -15,5 +16,6 @@ export const store = configureStore({
     users: userReducer,
     products: productReducer,
     favorites: favoriteReducer,
+    address: addressReducer,
   },
 });

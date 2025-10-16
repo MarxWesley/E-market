@@ -1,15 +1,29 @@
 // screens/AddressesScreen.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import {
-  View, Text, StyleSheet, TouchableOpacity, ScrollView, TextInput, Alert, Modal, Platform,
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  TextInput,
+  Alert,
+  Modal,
+  Platform,
 } from "react-native";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useForm, Controller } from "react-hook-form";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Ionicons } from "@expo/vector-icons";
-import addressService from "../services/addressService";
 
+import {
+  fetchAddresses,
+  createAddress,
+  updateAddress,
+  removeAddress,
+  setPrimaryAddress,
+} from "../store/features/addressSlice";
 
 const PRIMARY = "#2F87E1";
 const TYPES = [
@@ -19,13 +33,16 @@ const TYPES = [
 ];
 
 export default function AddressesScreen() {
+  const dispatch = useDispatch();
   const { user } = useSelector((s) => s.auth);
+  const { items, loading } = useSelector((s) => s.address);
+
   const userId = user?.id ?? user?._id ?? user?.userId ?? user?.uid;
 
-  const [items, setItems] = useState([]);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
 
+  // ======= validação =======
   const schema = useMemo(
     () =>
       Yup.object({
@@ -41,32 +58,51 @@ export default function AddressesScreen() {
     []
   );
 
-  const { control, handleSubmit, reset, formState: { errors, isSubmitting } } = useForm({
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
       label: "home",
-      street: "", number: "", complement: "",
-      district: "", city: "", state: "", zip: "",
+      street: "",
+      number: "",
+      complement: "",
+      district: "",
+      city: "",
+      state: "",
+      zip: "",
     },
   });
 
-  const load = async () => {
-    const data = await addressService.getAll(userId);
-    setItems(data || []);
-  };
+  // ======= carregar endereços (Redux) =======
+  useEffect(() => {
+    if (userId) dispatch(fetchAddresses(userId));
+  }, [dispatch, userId]);
 
-  useEffect(() => { load(); }, []);
-
+  // ======= abrir criar =======
   const openCreate = () => {
-    if (items.length >= 3) {
+    if ((items?.length || 0) >= 3) {
       Alert.alert("Limite atingido", "Você pode ter no máximo 3 endereços.");
       return;
     }
     setEditing(null);
-    reset({ label: "home", street: "", number: "", complement: "", district: "", city: "", state: "", zip: "" });
+    reset({
+      label: "home",
+      street: "",
+      number: "",
+      complement: "",
+      district: "",
+      city: "",
+      state: "",
+      zip: "",
+    });
     setOpen(true);
   };
 
+  // ======= abrir editar =======
   const openEdit = (item) => {
     setEditing(item);
     reset({
@@ -82,62 +118,52 @@ export default function AddressesScreen() {
     setOpen(true);
   };
 
+  // ======= salvar (create/update) via Redux =======
   const onSubmit = async (values) => {
     try {
       if (editing) {
-        await addressService.update(userId, editing.id, values);
+        await dispatch(
+          updateAddress({ userId, id: editing.id, addr: values })
+        ).unwrap();
       } else {
-        await addressService.create(userId, { ...values, isPrimary: false });
+        await dispatch(
+          createAddress({ userId, addr: { ...values, isPrimary: false } })
+        ).unwrap();
       }
       setOpen(false);
-      await load();
     } catch (e) {
       Alert.alert("Erro", e?.message || "Falha ao salvar endereço");
     }
   };
 
-  // screens/AddressesScreen.jsx (dentro do componente)
-
-// screens/AddressesScreen.jsx  → DENTRO DO COMPONENTE
-
-    const removeItem = (id) => {
+  // ======= excluir (com web-friendly confirm) =======
+  const removeItem = (id) => {
     const doDelete = async () => {
-        // 1) UI OTIMISTA
-        setItems((prev) => prev.filter((i) => String(i.id) !== String(id)));
-
-        try {
-        // 2) Persiste
-        await addressService.remove(userId, id);
-        } catch (e) {
-        console.log("Erro ao excluir:", e?.message || e);
-        } finally {
-        // 3) Sincroniza para refletir promoção de principal
-        const data = await addressService.getAll(userId);
-        setItems(data || []);
-        }
+      try {
+        await dispatch(removeAddress({ userId, id })).unwrap();
+      } catch (e) {
+        Alert.alert("Erro", e?.message || "Falha ao excluir endereço");
+      }
     };
 
-  if (Platform.OS === "web") {
-    // Web: usa window.confirm (Alert às vezes é bloqueado)
-    if (window.confirm("Deseja remover este endereço?")) {
-      doDelete();
+    if (Platform.OS === "web") {
+      if (window.confirm("Deseja remover este endereço?")) doDelete();
+      return;
     }
-    return;
-  }
 
-  // Mobile: usa Alert normal
-  Alert.alert("Excluir", "Deseja remover este endereço?", [
-    { text: "Cancelar", style: "cancel" },
-    { text: "Remover", style: "destructive", onPress: doDelete },
-  ]);
-};
+    Alert.alert("Excluir", "Deseja remover este endereço?", [
+      { text: "Cancelar", style: "cancel" },
+      { text: "Remover", style: "destructive", onPress: doDelete },
+    ]);
+  };
 
-  
-  
-
+  // ======= definir principal =======
   const setPrimary = async (id) => {
-    await addressService.setPrimary(userId, id);
-    await load();
+    try {
+      await dispatch(setPrimaryAddress({ userId, id })).unwrap();
+    } catch (e) {
+      Alert.alert("Erro", e?.message || "Falha ao definir principal");
+    }
   };
 
   return (
@@ -146,10 +172,19 @@ export default function AddressesScreen() {
         {/* Lista */}
         {items.map((it) => (
           <View key={it.id} style={styles.card}>
-            <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
+            <View
+              style={{
+                flexDirection: "row",
+                justifyContent: "space-between",
+                alignItems: "center",
+              }}
+            >
               <View style={{ flexDirection: "row", alignItems: "center" }}>
                 <Ionicons
-                  name={TYPES.find((t) => t.value === it.label)?.icon || "location-outline"}
+                  name={
+                    TYPES.find((t) => t.value === it.label)?.icon ||
+                    "location-outline"
+                  }
                   size={20}
                   color={PRIMARY}
                   style={{ marginRight: 8 }}
@@ -170,7 +205,10 @@ export default function AddressesScreen() {
 
             <View style={styles.actions}>
               {!it.isPrimary && (
-                <TouchableOpacity style={styles.chip} onPress={() => setPrimary(it.id)}>
+                <TouchableOpacity
+                  style={styles.chip}
+                  onPress={() => setPrimary(it.id)}
+                >
                   <Ionicons name="star-outline" size={16} color={PRIMARY} />
                   <Text style={styles.chipText}>Definir principal</Text>
                 </TouchableOpacity>
@@ -179,16 +217,21 @@ export default function AddressesScreen() {
                 <Ionicons name="create-outline" size={16} color={PRIMARY} />
                 <Text style={styles.chipText}>Editar</Text>
               </TouchableOpacity>
-              <TouchableOpacity style={[styles.chip, { borderColor: "#EF4444" }]} onPress={() => removeItem(it.id)}>
+              <TouchableOpacity
+                style={[styles.chip, { borderColor: "#EF4444" }]}
+                onPress={() => removeItem(it.id)}
+              >
                 <Ionicons name="trash-outline" size={16} color="#EF4444" />
-                <Text style={[styles.chipText, { color: "#EF4444" }]}>Excluir</Text>
+                <Text style={[styles.chipText, { color: "#EF4444" }]}>
+                  Excluir
+                </Text>
               </TouchableOpacity>
             </View>
           </View>
         ))}
 
         {/* Vazio */}
-        {items.length === 0 && (
+        {!loading && items.length === 0 && (
           <View style={[styles.card, { alignItems: "center" }]}>
             <Text style={{ color: "#6B7280" }}>Nenhum endereço cadastrado.</Text>
           </View>
@@ -200,8 +243,17 @@ export default function AddressesScreen() {
 
       {/* Botão fixo adicionar */}
       <View style={styles.footer}>
-        <TouchableOpacity style={[styles.button, items.length >= 3 && { opacity: 0.5 }]} onPress={openCreate} disabled={items.length >= 3}>
-          <Ionicons name="add-circle-outline" size={18} color="#fff" style={{ marginRight: 8 }} />
+        <TouchableOpacity
+          style={[styles.button, items.length >= 3 && { opacity: 0.5 }]}
+          onPress={openCreate}
+          disabled={items.length >= 3}
+        >
+          <Ionicons
+            name="add-circle-outline"
+            size={18}
+            color="#fff"
+            style={{ marginRight: 8 }}
+          />
           <Text style={styles.buttonText}>Adicionar endereço</Text>
         </TouchableOpacity>
       </View>
@@ -210,7 +262,9 @@ export default function AddressesScreen() {
       <Modal transparent visible={open} animationType="slide" onRequestClose={() => setOpen(false)}>
         <View style={styles.modalBackdrop}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>{editing ? "Editar endereço" : "Novo endereço"}</Text>
+            <Text style={styles.modalTitle}>
+              {editing ? "Editar endereço" : "Novo endereço"}
+            </Text>
 
             {/* Tipo */}
             <Controller
@@ -223,11 +277,19 @@ export default function AddressesScreen() {
                       key={t.value}
                       style={[
                         styles.typeBtn,
-                        value === t.value && { backgroundColor: "#EEF6FF", borderColor: PRIMARY },
+                        value === t.value && {
+                          backgroundColor: "#EEF6FF",
+                          borderColor: PRIMARY,
+                        },
                       ]}
                       onPress={() => onChange(t.value)}
                     >
-                      <Ionicons name={t.icon} size={16} color={PRIMARY} style={{ marginRight: 6 }} />
+                      <Ionicons
+                        name={t.icon}
+                        size={16}
+                        color={PRIMARY}
+                        style={{ marginRight: 6 }}
+                      />
                       <Text style={{ color: PRIMARY }}>{t.label}</Text>
                     </TouchableOpacity>
                   ))}
@@ -259,7 +321,9 @@ export default function AddressesScreen() {
                       onBlur={onBlur}
                       placeholder={f.label}
                     />
-                    {errors[f.name] && <Text style={styles.error}>{errors[f.name]?.message}</Text>}
+                    {errors[f.name] && (
+                      <Text style={styles.error}>{errors[f.name]?.message}</Text>
+                    )}
                   </View>
                 )}
               />
@@ -272,9 +336,14 @@ export default function AddressesScreen() {
                 onPress={handleSubmit(onSubmit)}
                 disabled={isSubmitting}
               >
-                <Text style={styles.primaryBtnText}>{isSubmitting ? "Salvando..." : "Salvar"}</Text>
+                <Text style={styles.primaryBtnText}>
+                  {isSubmitting ? "Salvando..." : "Salvar"}
+                </Text>
               </TouchableOpacity>
-              <TouchableOpacity style={styles.secondaryBtn} onPress={() => setOpen(false)}>
+              <TouchableOpacity
+                style={styles.secondaryBtn}
+                onPress={() => setOpen(false)}
+              >
                 <Text style={styles.secondaryBtnText}>Cancelar</Text>
               </TouchableOpacity>
             </View>
@@ -320,11 +389,15 @@ const styles = StyleSheet.create({
   chipText: { color: PRIMARY, fontWeight: "600" },
 
   footer: {
-    position: "absolute", left: 0, right: 0, bottom: 0,
-    padding: 12, backgroundColor: "#F3F4F6",
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    padding: 12,
+    backgroundColor: "#F3F4F6",
   },
   button: {
-    backgroundColor: PRIMARY, // se preferir azul, troque para PRIMARY
+    backgroundColor: PRIMARY,
     borderRadius: 10,
     paddingVertical: 14,
     alignItems: "center",
@@ -335,7 +408,8 @@ const styles = StyleSheet.create({
 
   // Modal
   modalBackdrop: {
-    flex: 1, backgroundColor: "rgba(0,0,0,0.4)",
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.4)",
     justifyContent: "flex-end",
   },
   modalCard: {

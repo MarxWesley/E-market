@@ -25,7 +25,6 @@ import CreateVehicleScreen from "./screens/CreateVehicleScreen";
 import MyClassifieds from "./screens/MyClassifieds";
 import CreateItemScreen from "./screens/CreateItemScreen";
 import ItemDetailScreen from "./screens/ItemDetailScreen";
-import EditItemScreen from "./screens/EditItemScreen";
 import FavoriteScreen from "./screens/FavoriteScreen";
 import EditProfileScreen from "./screens/EditProfileScreen";
 import AddressesScreen from "./screens/AddressesScreen";
@@ -92,11 +91,7 @@ function RootNavigator() {
             component={ItemDetailScreen}
             options={{ headerShown: true, title: "Detalhes" }}
           />
-          <Stack.Screen
-            name="EditItemScreen"
-            component={EditItemScreen}
-            options={{ headerShown: true, title: "Editar" }}
-          />
+    
           <Stack.Screen
             name="FavoriteScreen"
             component={FavoriteScreen}
