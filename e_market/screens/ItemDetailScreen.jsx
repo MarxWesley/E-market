@@ -12,7 +12,11 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useDispatch, useSelector } from "react-redux";
-import { addFavorite, fetchFavoritesByUserId, removeFavorite } from "../store/features/favoriteSlice";
+import {
+  addFavorite,
+  fetchFavoritesByUserId,
+  removeFavorite,
+} from "../store/features/favoriteSlice";
 import { v4 as uuidv4 } from "uuid";
 
 const { width, height } = Dimensions.get("window");
@@ -35,7 +39,6 @@ export default function ItemDetailScreen({ route }) {
     );
     setIsSaved(saved);
   }, [favorites, products.id, user]);
-
 
   useEffect(() => {
     if (user?.id) {
@@ -63,7 +66,6 @@ export default function ItemDetailScreen({ route }) {
       setIsSaved(true);
     }
   };
-
 
   return (
     <ScrollView style={styles.container}>
@@ -121,7 +123,11 @@ export default function ItemDetailScreen({ route }) {
       {/* ações */}
       <View style={styles.actionsContainer}>
         <TouchableOpacity style={styles.actionButton}>
-          <Ionicons name="chatbubble-ellipses-outline" size={30} color="#319BE5" />
+          <Ionicons
+            name="chatbubble-ellipses-outline"
+            size={30}
+            color="#319BE5"
+          />
           <Text style={styles.actionText}>Enviar{"\n"}mensagem</Text>
         </TouchableOpacity>
 
@@ -145,6 +151,42 @@ export default function ItemDetailScreen({ route }) {
         <Text style={styles.descriptionTitle}>Descrição</Text>
         <Text style={styles.descriptionText}>{products.description}</Text>
       </View>
+
+      {products.category === "veiculos" ? (
+        <View style={styles.autoDetailContainer}>
+          <Text style={styles.descriptionTitle}>Detalhes do veículo</Text>
+          {[
+            {
+              label: "Quilometragem",
+              value: `${products.mileage} quilômetros rodados`,
+            },
+            { label: "Ano", value: products.year },
+            { label: "Modelo", value: products.model },
+            { label: "Montadora", value: products.brand },
+          ].map((item, index) => (
+            <View key={index} style={styles.detailRow}>
+              <Text style={styles.autoDetailTitle}>{item.label}</Text>
+              <Text style={styles.autoDetailText}>{item.value}</Text>
+            </View>
+          ))}
+        </View>
+      ) : (
+        <View style={styles.autoDetailContainer}>
+          <Text style={styles.descriptionTitle}>Detalhes</Text>
+          {[
+            {
+              label: "Condição",
+              value: `${products.condition}`,
+            },
+            { label: "Categoria", value: products.category },
+          ].map((item, index) => (
+            <View key={index} style={styles.detailRow}>
+              <Text style={styles.autoDetailTitle}>{item.label}</Text>
+              <Text style={styles.autoDetailText}>{item.value}</Text>
+            </View>
+          ))}
+        </View>
+      )}
     </ScrollView>
   );
 }
@@ -184,5 +226,25 @@ const styles = StyleSheet.create({
   actionText: { fontSize: 12, textAlign: "center", color: "#333" },
   descriptionContainer: { padding: 16 },
   descriptionTitle: { fontWeight: "bold", fontSize: 16, marginBottom: 6 },
-  descriptionText: { fontSize: 14, color: "#444" },
+  descriptionText: { fontSize: 14, color: "#555", },
+  autoDetailContainer: {
+    marginVertical: 10,
+    paddingHorizontal: 16,
+    borderTopWidth: 0.5,
+    borderBottomWidth: 0.5,
+    borderColor: "#ccc",
+  },
+  detailRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 8, // espaço entre as linhas
+  },
+  autoDetailTitle: {
+    fontWeight: "500",
+    fontSize: 14,
+  },
+  autoDetailText: {
+    fontSize: 14,
+    color: "#555",
+  },
 });
