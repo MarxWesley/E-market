@@ -27,6 +27,8 @@ import CreateItemScreen from "./screens/CreateItemScreen";
 import ItemDetailScreen from "./screens/ItemDetailScreen";
 import EditItemScreen from "./screens/EditItemScreen";
 import FavoriteScreen from "./screens/FavoriteScreen";
+import EditProfileScreen from "./screens/EditProfileScreen";
+
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -99,6 +101,12 @@ function RootNavigator() {
             component={FavoriteScreen}
             options={{ headerShown: true, title: "Favoritos" }}
           />
+          <Stack.Screen
+            name="EditProfile"
+            component={EditProfileScreen}
+            options={{ headerShown: true, title: "Editar perfil" }}
+          />
+          
         </>
       ) : (
         <>

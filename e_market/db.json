@@ -1,11 +1,9 @@
 {
   "users": [
     {
-      "id": "1",
-      "nome": "Pedro",
-      "email": "pedro@teste.com",
-      "cpf": "12345678901",
-      "senha": "123456"
+      "name": "ponei",
+      "email": "pedro@teste1.com",
+      "id": "1"
     },
     {
       "id": "2fd1",
