@@ -1,16 +1,12 @@
-// src/services/addressService.js
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import api from "./api";
 
 const KEY = (userId) => `@addresses:${userId}`;
 
-/**
- * Flag em memória: se a API suportar /users/:id/addresses fica true.
- * Ao detectar 404, desliga e não tenta mais chamar a API nessa sessão.
- */
+
 let HAS_ADDRESS_API = true;
 
-// ------------ Helpers local (AsyncStorage) ------------
+
 const localGet = async (userId) => {
   const raw = await AsyncStorage.getItem(KEY(userId));
   return raw ? JSON.parse(raw) : [];

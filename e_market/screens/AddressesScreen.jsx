@@ -1,4 +1,3 @@
-// screens/AddressesScreen.jsx
 import React, { useEffect, useMemo, useState } from "react";
 import {
   View,
@@ -7,15 +6,15 @@ import {
   TouchableOpacity,
   ScrollView,
   TextInput,
-  Alert,
   Modal,
-  Platform,
 } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { useForm, Controller } from "react-hook-form";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Ionicons } from "@expo/vector-icons";
+import DialogComponent from "../components/ui/DialogComponent";
+
 
 import {
   fetchAddresses,
@@ -41,6 +40,8 @@ export default function AddressesScreen() {
 
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState(null);
+  const [dialogVisible, setDialogVisible] = useState(false);
+  const [addressToDelete, setAddressToDelete] = useState(null);
 
   // ======= validação =======
   const schema = useMemo(
@@ -85,7 +86,7 @@ export default function AddressesScreen() {
   // ======= abrir criar =======
   const openCreate = () => {
     if ((items?.length || 0) >= 3) {
-      Alert.alert("Limite atingido", "Você pode ter no máximo 3 endereços.");
+      alert("Você pode ter no máximo 3 endereços.");
       return;
     }
     setEditing(null);
@@ -132,29 +133,27 @@ export default function AddressesScreen() {
       }
       setOpen(false);
     } catch (e) {
-      Alert.alert("Erro", e?.message || "Falha ao salvar endereço");
+      alert(e?.message || "Falha ao salvar endereço");
     }
   };
 
-  // ======= excluir (com web-friendly confirm) =======
-  const removeItem = (id) => {
-    const doDelete = async () => {
-      try {
-        await dispatch(removeAddress({ userId, id })).unwrap();
-      } catch (e) {
-        Alert.alert("Erro", e?.message || "Falha ao excluir endereço");
+  // ======= excluir =======
+  const confirmDelete = (id) => {
+    setAddressToDelete(id);
+    setDialogVisible(true);
+  };
+
+  const handleDelete = async () => {
+    try {
+      if (addressToDelete) {
+        await dispatch(removeAddress({ userId, id: addressToDelete })).unwrap();
       }
-    };
-
-    if (Platform.OS === "web") {
-      if (window.confirm("Deseja remover este endereço?")) doDelete();
-      return;
+    } catch (e) {
+      alert(e?.message || "Falha ao excluir endereço");
+    } finally {
+      setDialogVisible(false);
+      setAddressToDelete(null);
     }
-
-    Alert.alert("Excluir", "Deseja remover este endereço?", [
-      { text: "Cancelar", style: "cancel" },
-      { text: "Remover", style: "destructive", onPress: doDelete },
-    ]);
   };
 
   // ======= definir principal =======
@@ -162,7 +161,7 @@ export default function AddressesScreen() {
     try {
       await dispatch(setPrimaryAddress({ userId, id })).unwrap();
     } catch (e) {
-      Alert.alert("Erro", e?.message || "Falha ao definir principal");
+      alert(e?.message || "Falha ao definir principal");
     }
   };
 
@@ -219,7 +218,7 @@ export default function AddressesScreen() {
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.chip, { borderColor: "#EF4444" }]}
-                onPress={() => removeItem(it.id)}
+                onPress={() => confirmDelete(it.id)}
               >
                 <Ionicons name="trash-outline" size={16} color="#EF4444" />
                 <Text style={[styles.chipText, { color: "#EF4444" }]}>
@@ -237,7 +236,6 @@ export default function AddressesScreen() {
           </View>
         )}
 
-        {/* Espaço final */}
         <View style={{ height: 80 }} />
       </ScrollView>
 
@@ -258,8 +256,25 @@ export default function AddressesScreen() {
         </TouchableOpacity>
       </View>
 
+      {/* Confirmação com DialogComponent */}
+      <DialogComponent
+        visible={dialogVisible}
+        onConfirm={handleDelete}
+        onDismiss={() => setDialogVisible(false)}
+        title="Excluir endereço"
+        message="Deseja realmente remover este endereço?"
+        icon="alert"
+        textConfirm="Remover"
+        textCancel="Cancelar"
+      />
+
       {/* Modal formulário */}
-      <Modal transparent visible={open} animationType="slide" onRequestClose={() => setOpen(false)}>
+      <Modal
+        transparent
+        visible={open}
+        animationType="slide"
+        onRequestClose={() => setOpen(false)}
+      >
         <View style={styles.modalBackdrop}>
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>
@@ -356,7 +371,6 @@ export default function AddressesScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#F3F4F6" },
-
   card: {
     backgroundColor: "#fff",
     borderRadius: 12,
@@ -387,7 +401,6 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   chipText: { color: PRIMARY, fontWeight: "600" },
-
   footer: {
     position: "absolute",
     left: 0,
@@ -405,8 +418,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   buttonText: { color: "#fff", fontWeight: "700", fontSize: 16 },
-
-  // Modal
   modalBackdrop: {
     flex: 1,
     backgroundColor: "rgba(0,0,0,0.4)",
@@ -419,8 +430,12 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 16,
     maxHeight: "90%",
   },
-  modalTitle: { fontSize: 16, fontWeight: "700", marginBottom: 10, color: "#111827" },
-
+  modalTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    marginBottom: 10,
+    color: "#111827",
+  },
   typeBtn: {
     flexDirection: "row",
     alignItems: "center",
@@ -430,7 +445,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     borderRadius: 999,
   },
-
   label: { color: "#374151", marginBottom: 6, fontSize: 14 },
   input: {
     borderWidth: 1,
@@ -442,7 +456,6 @@ const styles = StyleSheet.create({
   },
   inputError: { borderColor: "#e74c3c" },
   error: { color: "#e74c3c", marginTop: 6, fontSize: 13 },
-
   primaryBtn: {
     backgroundColor: PRIMARY,
     paddingVertical: 12,

@@ -82,8 +82,7 @@ export default function AccountScreen() {
   const handleConfirmLogout = async () => {
     dispatch(logout());
     setDialogVisible(false);
-    // Se preferir forçar a tela de login, descomente:
-    // navigation.reset({ index: 0, routes: [{ name: 'Login' }] });
+    
   };
 
   const menu = [
@@ -91,9 +90,7 @@ export default function AccountScreen() {
     { key: 'favorites', icon: 'heart-outline', label: 'Favoritos', onPress: () => navigation.navigate('FavoriteScreen') },
     { key: 'edit', icon: 'person-outline', label: 'Editar perfil', onPress: () => navigation.navigate('EditProfile') },
     { key: 'address', icon: 'home-outline', label: 'Endereços', onPress: () => navigation.navigate('Addresses') },
-    { key: 'notifications', icon: 'notifications-outline', label: 'Notificações', onPress: () => navigation.navigate('Notifications') },
-    { key: 'help', icon: 'chatbubbles-outline', label: 'Ajuda e suporte', onPress: () => navigation.navigate('Message') },
-    { key: 'about', icon: 'information-circle-outline', label: 'Sobre o E-market', onPress: () => Alert.alert('Sobre', 'E-market v1.0') },
+  
   ];
 
   return (
@@ -133,16 +130,6 @@ export default function AccountScreen() {
           <StatCard label="Favoritos" value={stats.favorites} />
         </View>
 
-        {/* Preferências //tema dark
-        <View style={styles.card}>
-          <View style={styles.switchRow}>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Ionicons name="moon-outline" size={20} color="#6B7280" style={{ marginRight: 8 }} />
-              <Text style={styles.switchText}>Tema escuro</Text>
-            </View>
-            <Switch value={darkMode} onValueChange={onToggleTheme} />
-          </View>
-        </View> */}
 
         {/* Menu principal */}
         <View style={styles.card}>

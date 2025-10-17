@@ -6,8 +6,8 @@
       "id": "1"
     },
     {
-      "name": "pedro123",
-      "email": "pedro@teste.com",
+      "name": "pedrovinicius",
+      "email": "pedro@teste.com.br",
       "id": "2fd1"
     },
     {
@@ -48,6 +48,13 @@
       "nome": "Wesley Marks",
       "email": "wesley@1.com",
       "cpf": "12345678999",
+      "senha": "123456"
+    },
+    {
+      "id": "8deb",
+      "nome": "Pedro",
+      "email": "pedro@teste.com",
+      "cpf": "12312312312",
       "senha": "123456"
     }
   ],
@@ -129,6 +136,16 @@
       "id": "b61113e6-acd6-4977-840c-ffc3958c4e41",
       "userId": "29a8",
       "productId": "d103cd03-6492-4297-aeab-dfc798addfd8"
+    },
+    {
+      "id": "a0536c44-1a05-4e35-9784-2acec86b35eb",
+      "userId": "2fd1",
+      "productId": "b4076386-3639-4cb6-a9b9-c8ac29c38ada"
+    },
+    {
+      "id": "bb71283e-efbd-46d6-8f00-5944f5f2f7ec",
+      "userId": "cc4b",
+      "productId": "7d80e8fa-24f9-4fde-95df-f811b7d71662"
     }
   ]
 }
