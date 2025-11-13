@@ -1,33 +1,38 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import productService from "../../services/productService";
 
-// Thunks assync
+// ==========================
+// THUNKS - GET
+// ==========================
 
-export const fetchProducts = createAsyncThunk("products/fetchAll", async () => {
+export const fetchProducts = createAsyncThunk("items/fetchAll", async () => {
   return await productService.getAllProducts();
 });
 
-
 export const fetchProductById = createAsyncThunk(
-  "products/fetchById",
+  "items/fetchById",
   async (id) => {
-    return await productService.getProductById(id); // faltava o return
+    return await productService.getProductById(id);
   }
 );
 
 export const fetchProductByTitle = createAsyncThunk(
-  "products/fetchByName",
+  "items/fetchByTitle",
   async (title) => {
-    return await productService.getProductsByTitle(title); // faltava o return
+    return await productService.getProductsByTitle(title);
   }
 );
 
 export const fetchProductByUserId = createAsyncThunk(
-  "products/fetchByUserId",
+  "items/fetchByUserId",
   async (userId) => {
-    return await productService.getProductByUserId(userId); // faltava o return
+    return await productService.getProductByUserId(userId);
   }
 );
+
+// ==========================
+// THUNKS - PRODUCT
+// ==========================
 
 export const addProduct = createAsyncThunk("products/add", async (product) => {
   return await productService.createProduct(product);
@@ -45,13 +50,36 @@ export const removeProduct = createAsyncThunk(
   async (id) => await productService.deleteProduct(id)
 );
 
+// ==========================
+// THUNKS - VEHICLE
+// ==========================
+
+export const addVehicle = createAsyncThunk("vehicles/add", async (vehicle) => {
+  return await productService.createVehicle(vehicle);
+});
+
+export const editVehicle = createAsyncThunk(
+  "vehicles/edit",
+  async ({ id, ...vehicleData }) => {
+    return await productService.updateVehicle(id, vehicleData);
+  }
+);
+
+export const removeVehicle = createAsyncThunk(
+  "vehicles/remove",
+  async (id) => await productService.deleteVehicle(id)
+);
+
+// ==========================
+// SLICE
+// ==========================
+
 const productSlice = createSlice({
   name: "products",
   initialState: {
-    products: [], // todos os produtos
-    userProducts: [], // só do usuário logado
+    products: [],
+    userProducts: [],
     productDetail: null,
-    categories: [],
     loading: false,
     error: null,
     success: false,
@@ -65,9 +93,13 @@ const productSlice = createSlice({
       state.productDetail = null;
     },
   },
+
   extraReducers: (builder) => {
     builder
-      // 🔹 Buscar todos
+
+      // ===============================
+      // GET ALL
+      // ===============================
       .addCase(fetchProducts.pending, (state) => {
         state.products = [];
         state.loading = true;
@@ -76,62 +108,81 @@ const productSlice = createSlice({
       .addCase(fetchProducts.fulfilled, (state, { payload }) => {
         state.products = payload;
         state.loading = false;
-        state.error = null;
       })
-      .addCase(fetchProducts.rejected, (state, { payload }) => {
+      .addCase(fetchProducts.rejected, (state) => {
         state.error = "Erro ao buscar produtos";
         state.loading = false;
         state.products = [];
-        console.error(payload);
       })
 
-      // 🔹 Buscar por ID
+      // GET BY ID
       .addCase(fetchProductById.fulfilled, (state, action) => {
         state.productDetail = action.payload;
       })
 
-      // 🔹 Buscar por userID
+      // GET BY USER
       .addCase(fetchProductByUserId.fulfilled, (state, action) => {
         state.userProducts = action.payload;
       })
 
-      // 🔹 Buscar por nome
+      // GET BY TITLE
       .addCase(fetchProductByTitle.fulfilled, (state, action) => {
         state.products = action.payload;
       })
 
-      // 🔹 Criar produto
+      // ===============================
+      // PRODUCT CRUD
+      // ===============================
+
       .addCase(addProduct.pending, (state) => {
         state.loading = true;
       })
       .addCase(addProduct.fulfilled, (state, { payload }) => {
+        state.products.push(payload);
         state.loading = false;
         state.success = true;
-        state.products.push(payload);
       })
       .addCase(addProduct.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
       })
 
-      // 🔹 Editar produto
       .addCase(editProduct.fulfilled, (state, { payload }) => {
         const index = state.products.findIndex((p) => p.id === payload.id);
         if (index !== -1) state.products[index] = payload;
         state.success = true;
       })
 
-      // 🔹 Excluir produto
       .addCase(removeProduct.fulfilled, (state, action) => {
         state.products = state.products.filter((p) => p.id !== action.meta.arg);
         state.success = true;
       })
 
-      // 🔹 Categorias
-      .addCase(fetchCategories.fulfilled, (state, action) => {
-        state.categories = action.payload;
+      // ===============================
+      // VEHICLE CRUD
+      // ===============================
+
+      .addCase(addVehicle.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(addVehicle.fulfilled, (state, { payload }) => {
+        state.products.push(payload);
+        state.loading = false;
+        state.success = true;
+      })
+
+      .addCase(editVehicle.fulfilled, (state, { payload }) => {
+        const index = state.products.findIndex((v) => v.id === payload.id);
+        if (index !== -1) state.products[index] = payload;
+        state.success = true;
+      })
+
+      .addCase(removeVehicle.fulfilled, (state, action) => {
+        state.products = state.products.filter((v) => v.id !== action.meta.arg);
+        state.success = true;
       });
   },
+
   selectors: {
     selectAllProducts: (state) => state.products,
     selectLoading: (state) => state.loading,
@@ -143,4 +194,5 @@ const productSlice = createSlice({
 export const { resetSuccess, clearProductDetail } = productSlice.actions;
 export const { selectAllProducts, selectLoading, selectError, selectSuccess } =
   productSlice.selectors;
+
 export const productReducer = productSlice.reducer;

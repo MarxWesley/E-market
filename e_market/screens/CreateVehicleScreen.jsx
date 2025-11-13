@@ -8,19 +8,17 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  Alert,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { v4 as uuidv4 } from "uuid";
-import { useForm, Controller, set } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { ImagePlus } from "lucide-react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigation } from "@react-navigation/native";
-import { addProduct, editProduct } from "../store/features/productSlice";
-import { use, useEffect, useState } from "react";
+import { addVehicle, editVehicle } from "../store/features/productSlice";
+import { useEffect, useState } from "react";
 import DialogComponent from "../components/ui/DialogComponent";
-import { MaskedTextInput } from "react-native-mask-text";
 import CurrencyInput from "react-native-currency-input";
 
 export default function CreateVehicleScren({ route }) {
@@ -44,7 +42,7 @@ export default function CreateVehicleScren({ route }) {
     { label: "Outro", value: "Outro" },
   ]);
 
-  const currentYear = new Date().getFullYear();
+  const currentYear = new Date().getFullYear()+1;
   const years = Array.from(
     { length: currentYear - 1980 + 1 },
     (_, i) => currentYear - i
@@ -62,13 +60,16 @@ export default function CreateVehicleScren({ route }) {
   } = useForm({
     defaultValues: {
       title: "",
+      price: "",
+      category: "",
+      description: "",
       type: "",
       year: "",
       brand: "",
       model: "",
       mileage: "",
-      price: "",
-      description: "",
+      fuelType: "",
+      transmission: "",
     },
   });
 
@@ -81,11 +82,12 @@ export default function CreateVehicleScren({ route }) {
         brand: data.brand || "",
         model: data.model || "",
         mileage: data.mileage ? data.mileage.toString() : "",
+        fuelType: data.fuelType || "",
+        transmission: data.transmission || "",
         price: data.price || "0",
         description: data.description || "",
-        userId: data.userId || "",
-        id: data.id || "",
-        createdAt: data.createdAt || "",
+        id: data.id,
+        createdAt: data.createdAt,
       });
       setImages(data.images || []);
     }
@@ -112,21 +114,33 @@ export default function CreateVehicleScren({ route }) {
   const onSubmit = async (formData) => {
     const vehicleData = {
       id: mode === "edit" ? formData.id : uuidv4(),
-      ...formData,
-      model: formData.model.toUpperCase(),
-      brand: formData.brand.toUpperCase(),
+      title: formData.title,
       price: parseFloat(formData.price),
-      category: "veiculos",
+      category: formData.category, // igual ao objeto enviado
+      description: formData.description,
+      active: true,
+      user: {
+        id: user.id,
+        name: user.name,
+      },
+      favorite: [],
+      createdAt:
+        mode === "edit" ? formData.createdAt : new Date().toISOString(),
+      type: formData.type, // "vehicle"
+      year: Number(formData.year),
+      brand: formData.brand.toUpperCase(),
+      model: formData.model.toUpperCase(),
+      mileage: Number(formData.mileage),
+      fuelType: formData.fuelType || "", // ADICIONE NO FORM
+      transmission: formData.transmission || "", // ADICIONE NO FORM
       images,
-      userId: user.id,
-      createdAt: new Date().toISOString(),
     };
 
     try {
       if (mode === "edit") {
-        await dispatch(editProduct({ id: vehicleData.id, ...vehicleData }));
+        await dispatch(editVehicle({ id: vehicleData.id, ...vehicleData }));
       } else {
-        await dispatch(addProduct(vehicleData));
+        await dispatch(addVehicle(vehicleData));
         reset();
         setImages([]);
       }
@@ -136,6 +150,7 @@ export default function CreateVehicleScren({ route }) {
     } catch (error) {
       console.error("Erro ao salvar veículo:", error);
     }
+
     console.log(vehicleData);
   };
 
@@ -292,6 +307,50 @@ export default function CreateVehicleScren({ route }) {
         />
         {errors.model && (
           <Text style={styles.errorText}>{errors.model.message}</Text>
+        )}
+        {/* Tipo de Combustível */}
+        <Controller
+          control={control}
+          name="fuelType"
+          rules={{ required: "O tipo de combustível é obrigatório" }}
+          render={({ field: { onChange, value } }) => (
+            <TextInput
+              placeholder="Tipo de combustível (Ex: Gasolina)"
+              style={[
+                styles.input,
+                focusedField === "fuelType" && { borderColor: "#319BE5" },
+              ]}
+              value={value}
+              onChangeText={onChange}
+              onFocus={() => setFocusedField("fuelType")}
+              onBlur={() => setFocusedField(null)}
+            />
+          )}
+        />
+        {errors.fuelType && (
+          <Text style={styles.errorText}>{errors.fuelType.message}</Text>
+        )}
+        {/* Transmissão */}
+        <Controller
+          control={control}
+          name="transmission"
+          rules={{ required: "A transmissão é obrigatória" }}
+          render={({ field: { onChange, value } }) => (
+            <TextInput
+              placeholder="Transmissão (Ex: Automático)"
+              style={[
+                styles.input,
+                focusedField === "transmission" && { borderColor: "#319BE5" },
+              ]}
+              value={value}
+              onChangeText={onChange}
+              onFocus={() => setFocusedField("transmission")}
+              onBlur={() => setFocusedField(null)}
+            />
+          )}
+        />
+        {errors.transmission && (
+          <Text style={styles.errorText}>{errors.transmission.message}</Text>
         )}
         {/* Quilometragem */}
         <Controller
