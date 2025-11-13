@@ -7,12 +7,6 @@ export const fetchProducts = createAsyncThunk("products/fetchAll", async () => {
   return await productService.getAllProducts();
 });
 
-export const fetchCategories = createAsyncThunk(
-  "products/fetchCategories",
-  async () => {
-    return await productService.getCategories();
-  }
-);
 
 export const fetchProductById = createAsyncThunk(
   "products/fetchById",

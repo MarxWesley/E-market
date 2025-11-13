@@ -2,34 +2,28 @@ import api from "./api";
 
 // Buscar todos os produtos
 const getAllProducts = async () => {
-    const response = await api.get(`/products`);
+    const response = await api.get(`/items`);
     return response.data;
 };
 
 // Buscar produto pelo ID
 const getProductById = async (id) => {
-    const response = await api.get(`/products/${id}`);
+    const response = await api.get(`/items/${id}`);
     return response.data;
 };
 
 //buscar produtos pelo ID do usuário
 const getProductByUserId = async (userId) => {
-    const response = await api.get(`/products?userId=${userId}`);
+    const response = await api.get(`/items?userId=${userId}`);
     return response.data;
 }
 
 // Buscar produtos pelo título (LIKE ignorando maiúsculas/minúsculas)
-const getProductsByTitle = async (title) => {
-  const response = await api.get(`/products`);
+const getProductsByType = async (type) => {
+  const response = await api.get(`/items?type=${type}`);
   return response.data.filter(product =>
-    product.title.toLowerCase().includes(title.toLowerCase())
+    product.type.toLowerCase().includes(type.toLowerCase())
   );
-};
-
-// Buscar categorias
-const getCategories = async () => {
-    const response = await api.get(`/categories`);
-    return response.data;
 };
 
 // Criar produto
@@ -57,10 +51,9 @@ const deleteProduct = async (id) => {
 export default {
     getAllProducts,
     getProductById,
-    getProductsByTitle,
+    getProductsByTitle: getProductsByType,
     createProduct,
     updateProduct,
     deleteProduct,
-    getCategories,
     getProductByUserId,
 }
