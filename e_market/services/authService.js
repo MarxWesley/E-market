@@ -1,19 +1,11 @@
 // src/services/authService.js
 import api from "./api";
 
-const login = async (email, senha) => {
+const login = async (credentials) => {
   try {
-    const response = await api.get("/users", {
-      params: { email, senha },
-    });
+    const { data } = await api.post("/auth/login", credentials);
 
-    if (response.data.length > 0) {
-      const user = response.data[0];
-      // token fake só para simulação
-      return { ...user, token: "fake-jwt-token-" + user.id };
-    } else {
-      throw new Error("Credenciais inválidas");
-    }
+    return data;
   } catch (error) {
     throw new Error(error.message || "Erro de rede");
   }

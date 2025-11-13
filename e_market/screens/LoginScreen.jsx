@@ -24,7 +24,7 @@ const PRIMARY = "#2F87E1";
 
 const schema = Yup.object({
   email: Yup.string().email("Email inválido").required("Informe o email"),
-  senha: Yup.string().min(6, "Mínimo 6 caracteres").required("Informe a senha"),
+  password: Yup.string().min(6, "Mínimo 6 caracteres").required("Informe a senha"),
 });
 
 export default function LoginScreen() {
@@ -41,20 +41,20 @@ export default function LoginScreen() {
     formState: { errors },
   } = useForm({
     resolver: yupResolver(schema),
-    defaultValues: { email: "", senha: "" },
+    defaultValues: { email: "", password: "" },
     mode: "onChange",
   });
 
-  const onSubmit = async ({ email, senha }) => {
+  const onSubmit = async ({ email, password }) => {
     try {
       // normaliza email
       const safeEmail = email.trim().toLowerCase();
-      await dispatch(loginUser({ email: safeEmail, senha })).unwrap();
+      await dispatch(loginUser({ email: safeEmail, password })).unwrap();
       // Sucesso: RootNavigator troca para AppTabs ao detectar token no Redux
     } catch (e) {
       // Feedback de credenciais inválidas (mantém layout limpo)
       setError("email", { message: "Credenciais inválidas" });
-      setError("senha", { message: " " });
+      setError("password", { message: " " });
     }
   };
 
@@ -103,7 +103,7 @@ export default function LoginScreen() {
                   returnKeyType="next"
                   editable={!loading}
                   error={!!errors.email}
-                  style={[styles.input, errors.senha && styles.inputError]}
+                  style={[styles.input, errors.password && styles.inputError]}
                   onSubmitEditing={() => {}}
                 />
                 {errors.email && (
@@ -115,7 +115,7 @@ export default function LoginScreen() {
 
           {/* Senha */}
           <Controller
-            name="senha"
+            name="password"
             control={control}
             render={({ field: { onChange, onBlur, value } }) => (
               <View style={styles.inputWrap}>
@@ -129,8 +129,8 @@ export default function LoginScreen() {
                   textContentType="password"
                   returnKeyType="done"
                   editable={!loading}
-                  error={!!errors.senha}
-                  style={[styles.input, errors.senha && styles.inputError]}
+                  error={!!errors.password}
+                  style={[styles.input, errors.password && styles.inputError]}
                   onSubmitEditing={handleSubmit(onSubmit)}
                 />
                 <TouchableOpacity
@@ -146,8 +146,8 @@ export default function LoginScreen() {
                     <Eye color={"#808080"} />
                   )}
                 </TouchableOpacity>
-                {errors.senha && (
-                  <Text style={styles.errorText}>{errors.senha.message}</Text>
+                {errors.password && (
+                  <Text style={styles.errorText}>{errors.password.message}</Text>
                 )}
               </View>
             )}

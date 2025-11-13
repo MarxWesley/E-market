@@ -20,19 +20,20 @@ import { useDispatch, useSelector } from "react-redux";
 import { loginUser } from "../store/features/authSlice";
 import userService from "../services/userService";
 import { Eye, EyeOff } from "lucide-react-native";
+import { addUser } from "../store/features/userSlice";
 
 const PRIMARY = "#2F87E1";
 
 // ✅ validação
 const schema = Yup.object({
-  nome: Yup.string().trim().min(3, "Mínimo 3 letras").required("Informe o nome"),
+  name: Yup.string().trim().min(3, "Mínimo 3 letras").required("Informe o nome"),
   email: Yup.string().email("Email inválido").required("Informe o email"),
   cpf: Yup.string()
     .matches(/^\d{3}\.\d{3}\.\d{3}-\d{2}$/, "CPF inválido")
     .required("Informe o CPF"),
-  senha: Yup.string().min(6, "Mínimo 6 caracteres").required("Informe a senha"),
+  password: Yup.string().min(6, "Mínimo 6 caracteres").required("Informe a senha"),
   confirmarSenha: Yup.string()
-    .oneOf([Yup.ref("senha")], "Senhas não conferem")
+    .oneOf([Yup.ref("password")], "Senhas não conferem")
     .required("Confirme a senha"),
 });
 
@@ -52,10 +53,10 @@ export default function RegisterScreen() {
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
-      nome: "",
+      name: "",
       email: "",
       cpf: "",
-      senha: "",
+      password: "",
       confirmarSenha: "",
     },
     mode: "onChange",
@@ -64,17 +65,17 @@ export default function RegisterScreen() {
   const onSubmit = async (values) => {
     try {
       const payload = {
-        nome: values.nome.trim(),
+        name: values.name.trim(),
         email: values.email.trim().toLowerCase(),
         cpf: values.cpf.replace(/\D/g, ""), // remove máscara
-        senha: values.senha,
+        password: values.password,
       };
 
       // 1️⃣ Cria usuário no backend
-      await userService.createUser(payload);
+      await dispatch(addUser(payload));
 
       // 2️⃣ Login automático
-      await dispatch(loginUser({ email: payload.email, senha: payload.senha })).unwrap();
+      await dispatch(loginUser({ email: payload.email, password: payload.password })).unwrap();
       // Navegação automática via RootNavigator detectando token
     } catch (e) {
       const msg = typeof e === "string" ? e : e?.message || "Erro ao registrar";
@@ -110,18 +111,18 @@ export default function RegisterScreen() {
 
           {/* Campos */}
           <Controller
-            name="nome"
+            name="name"
             control={control}
             render={({ field: { onChange, onBlur, value } }) => (
               <View style={styles.inputWrap}>
                 <TextInput
-                  style={[styles.input, errors.nome && styles.inputError]}
+                  style={[styles.input, errors.name && styles.inputError]}
                   placeholder="Nome completo"
                   onBlur={onBlur}
                   onChangeText={onChange}
                   value={value}
                 />
-                {errors.nome && <Text style={styles.errorText}>{errors.nome.message}</Text>}
+                {errors.name && <Text style={styles.errorText}>{errors.name.message}</Text>}
               </View>
             )}
           />
@@ -164,12 +165,12 @@ export default function RegisterScreen() {
           />
 
           <Controller
-            name="senha"
+            name="password"
             control={control}
             render={({ field: { onChange, onBlur, value } }) => (
               <View style={styles.inputWrap}>
                 <TextInput
-                  style={[styles.input, errors.senha && styles.inputError]}
+                  style={[styles.input, errors.password && styles.inputError]}
                   placeholder="Senha"
                   secureTextEntry={!showPass}
                   onBlur={onBlur}
@@ -179,7 +180,7 @@ export default function RegisterScreen() {
                 <TouchableOpacity style={styles.eye} onPress={() => setShowPass((s) => !s)}>
                   {showPass ? <EyeOff color="#808080" /> : <Eye color="#808080" />}
                 </TouchableOpacity>
-                {errors.senha && <Text style={styles.errorText}>{errors.senha.message}</Text>}
+                {errors.password && <Text style={styles.errorText}>{errors.password.message}</Text>}
               </View>
             )}
           />

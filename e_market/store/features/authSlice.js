@@ -1,73 +1,67 @@
-// store/features/authSlice.js
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import authService from "../../services/authService";
 
 /**
- * Login do usuário
- * Esperado de authService.login:
- *  - { token, user }   OU
- *  - { token, name, email, ... }
- * Normalizamos para { token, user } e persistimos no AsyncStorage.
+ * LOGIN USER
+ * Espera backend NestJS com endpoint POST /auth/login
+ * Exemplo de resposta esperada:
+ * {
+ *   "access_token": "jwt-token",
+ *   "user": { "id": 1, "name": "Wesley", "email": "wesley@email.com" }
+ * }
  */
 export const loginUser = createAsyncThunk(
   "auth/loginUser",
-  async ({ email, senha }, { rejectWithValue }) => {
+  async (credentials, { rejectWithValue }) => {
     try {
-      const res = await authService.login(email, senha);
+      const res = await authService.login(credentials);
 
-      // Separa token e possível user embutido
-      const { token, user: rawUser, ...rest } = res || {};
-      const baseUser = rawUser ?? rest ?? {};
+      // 💡 Padroniza possíveis chaves retornadas
+      const token = res?.access_token || res?.token || res?.jwt || null;
+      const user = res?.user || res?.data?.user || res?.usuario || {};
 
-      // Normaliza nome (aceita várias chaves comuns)
-      const normalizedName =
-        baseUser.name ??
-        baseUser.nome ??
-        baseUser.fullName ??
-        baseUser.fullname ??
-        baseUser.full_name ??
-        null;
+      if (!token) throw new Error("Token não recebido do servidor");
 
-      // Normaliza email (fallback para o email usado no form)
-      const normalizedEmail = baseUser.email ?? email ?? null;
-
-      // Normaliza avatar
-      const normalizedAvatar =
-        baseUser.avatarUrl ?? baseUser.avatar ?? baseUser.photoUrl ?? null;
-
-      // Monta user final (mantém demais props, mas padroniza name/email/avatarUrl)
-      const user = {
-        ...baseUser,
-        id: baseUser.id ?? baseUser._id ?? baseUser.userId ?? baseUser.uid ?? null,
-        name: normalizedName,
-        email: normalizedEmail,
-        avatarUrl: normalizedAvatar,
-      };
-
-      // Persistência
+      // 🔒 Salva sessão
       await AsyncStorage.multiSet([
-        ["@token", token ?? ""],
+        ["@token", token],
         ["@user", JSON.stringify(user)],
       ]);
 
       return { token, user };
     } catch (error) {
-      return rejectWithValue(error?.message || "Falha no login");
+      console.error("Erro loginUser:", error);
+      return rejectWithValue(
+        error.response?.data?.message || error.message || "Falha no login"
+      );
     }
   }
 );
 
-/** Hidrata sessão do AsyncStorage (usar no início do app). */
+/**
+ * HIDRATAR SESSÃO (AsyncStorage)
+ * Recarrega user/token do armazenamento local no início do app
+ */
 export const hydrateSession = createAsyncThunk(
   "auth/hydrateSession",
   async () => {
-    const [[, token], [, userStr]] = await AsyncStorage.multiGet(["@token", "@user"]);
+    const [[, token], [, userStr]] = await AsyncStorage.multiGet([
+      "@token",
+      "@user",
+    ]);
     const user = userStr ? JSON.parse(userStr) : null;
-    if (!token) return { token: null, user: null };
     return { token, user };
   }
 );
+
+/**
+ * LOGOUT (limpa AsyncStorage e estado)
+ */
+export const logoutUser = createAsyncThunk("auth/logoutUser", async () => {
+  await AsyncStorage.multiRemove(["@token", "@user"]);
+  return true;
+});
 
 const initialState = {
   user: null,
@@ -80,51 +74,41 @@ const authSlice = createSlice({
   name: "auth",
   initialState,
   reducers: {
-    /** Define credenciais manualmente (útil após cadastro) */
-    setCredentials: (state, action) => {
-      state.token = action.payload?.token ?? null;
-      state.user = action.payload?.user ?? null;
-      state.error = null;
-    },
-    logout: (state) => {
-      state.user = null;
-      state.token = null;
-      state.error = null;
-      // limpa armazenamento (sem await porque reducer é síncrono)
-      AsyncStorage.multiRemove(["@token", "@user", "@refreshToken"]).catch(() => {});
-    },
     clearError: (state) => {
       state.error = null;
     },
   },
   extraReducers: (builder) => {
     builder
-      // login
+      // LOGIN
       .addCase(loginUser.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload.user ?? null;
-        state.token = action.payload.token ?? null;
+        state.user = action.payload.user;
+        state.token = action.payload.token;
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || "Falha no Login";
+        state.error = action.payload || "Falha no login";
       })
 
-      // hidratação
+      // HIDRATAR
       .addCase(hydrateSession.fulfilled, (state, action) => {
-        state.user = action.payload.user ?? null;
-        state.token = action.payload.token ?? null;
+        state.user = action.payload.user;
+        state.token = action.payload.token;
       })
-      .addCase(hydrateSession.rejected, (state) => {
+
+      // LOGOUT
+      .addCase(logoutUser.fulfilled, (state) => {
         state.user = null;
         state.token = null;
+        state.error = null;
       });
   },
 });
 
-export const { setCredentials, logout, clearError } = authSlice.actions;
+export const { clearError } = authSlice.actions;
 export default authSlice.reducer;
