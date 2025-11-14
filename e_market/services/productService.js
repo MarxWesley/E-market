@@ -5,7 +5,7 @@ import api from "./api";
 // Helper para pegar headers com token
 // ==========================
 const getAuthHeaders = async () => {
-  const token = await AsyncStorage.getItem("token");
+  const token = await AsyncStorage.getItem("@token");
   if (!token) throw new Error("Token não encontrado");
   return {
     "Content-Type": "application/json",
@@ -14,7 +14,7 @@ const getAuthHeaders = async () => {
 };
 
 // ==========================
-// Produtos
+// PRODUTOS
 // ==========================
 
 // Buscar todos os produtos
@@ -31,17 +31,17 @@ const getProductById = async (id) => {
   return response.data;
 };
 
-// Buscar produtos pelo título (LIKE)
-const getProductsByTitle = async (title) => {
-  const headers = await getAuthHeaders();
-  const response = await api.get(`/items?title=${title}`, { headers });
-  return response.data;
-};
-
 // Buscar produtos pelo usuário
 const getProductByUserId = async (userId) => {
   const headers = await getAuthHeaders();
   const response = await api.get(`/items?userId=${userId}`, { headers });
+  return response.data;
+};
+
+// Buscar produtos pelo tipo (LIKE)
+const getProductsByTitle = async (title) => {
+  const headers = await getAuthHeaders();
+  const response = await api.get(`/items?title=${title}`, { headers });
   return response.data;
 };
 
@@ -69,7 +69,7 @@ const deleteProduct = async (id) => {
 };
 
 // ==========================
-// Veículos
+// VEÍCULOS
 // ==========================
 
 // Criar veículo
@@ -98,12 +98,13 @@ const deleteVehicle = async (id) => {
 // Alterar status do item
 const changeStatus = async (id) => {
   const headers = await getAuthHeaders();
+  // PATCH sem body: passar null como segundo argumento
   const response = await api.patch(`/items/${id}/status`, null, { headers });
   return response.data;
 };
 
 // ==========================
-// Export
+// EXPORT
 // ==========================
 export default {
   getAllProducts,

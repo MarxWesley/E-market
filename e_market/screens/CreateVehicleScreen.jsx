@@ -26,7 +26,6 @@ export default function CreateVehicleScren({ route }) {
 
   const dispatch = useDispatch();
   const navigation = useNavigation();
-  const user = useSelector((state) => state.auth.user);
 
   const [images, setImages] = useState([]);
   const [focusedField, setFocusedField] = useState(null); // controla qual campo está focado
@@ -42,7 +41,7 @@ export default function CreateVehicleScren({ route }) {
     { label: "Outro", value: "Outro" },
   ]);
 
-  const currentYear = new Date().getFullYear()+1;
+  const currentYear = new Date().getFullYear() + 1;
   const years = Array.from(
     { length: currentYear - 1980 + 1 },
     (_, i) => currentYear - i
@@ -86,8 +85,6 @@ export default function CreateVehicleScren({ route }) {
         transmission: data.transmission || "",
         price: data.price || "0",
         description: data.description || "",
-        id: data.id,
-        createdAt: data.createdAt,
       });
       setImages(data.images || []);
     }
@@ -113,27 +110,16 @@ export default function CreateVehicleScren({ route }) {
 
   const onSubmit = async (formData) => {
     const vehicleData = {
-      id: mode === "edit" ? formData.id : uuidv4(),
       title: formData.title,
       price: parseFloat(formData.price),
       category: formData.category, // igual ao objeto enviado
       description: formData.description,
-      active: true,
-      user: {
-        id: user.id,
-        name: user.name,
-      },
-      favorite: [],
-      createdAt:
-        mode === "edit" ? formData.createdAt : new Date().toISOString(),
-      type: formData.type, // "vehicle"
       year: Number(formData.year),
       brand: formData.brand.toUpperCase(),
       model: formData.model.toUpperCase(),
       mileage: Number(formData.mileage),
       fuelType: formData.fuelType || "", // ADICIONE NO FORM
       transmission: formData.transmission || "", // ADICIONE NO FORM
-      images,
     };
 
     try {
@@ -351,6 +337,28 @@ export default function CreateVehicleScren({ route }) {
         />
         {errors.transmission && (
           <Text style={styles.errorText}>{errors.transmission.message}</Text>
+        )}
+        {/* Category */}
+        <Controller
+          control={control}
+          name="category"
+          rules={{ required: "A categoria é obrigatória" }}
+          render={({ field: { onChange, value } }) => (
+            <TextInput
+              placeholder="Categoria ex (Esportivo, Luxo, Popular...)"
+              style={[
+                styles.input,
+                focusedField === "category" && { borderColor: "#319BE5" },
+              ]}
+              value={value}
+              onChangeText={onChange}
+              onFocus={() => setFocusedField("category")}
+              onBlur={() => setFocusedField(null)}
+            />
+          )}
+        />
+        {errors.category && (
+          <Text style={styles.errorText}>{errors.category.message}</Text>
         )}
         {/* Quilometragem */}
         <Controller
