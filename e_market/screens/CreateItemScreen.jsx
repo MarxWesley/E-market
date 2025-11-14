@@ -12,7 +12,6 @@ import {
   Alert,
 } from "react-native";
 import * as ImagePicker from "expo-image-picker";
-import { v4 as uuidv4 } from "uuid";
 import { useForm, Controller } from "react-hook-form";
 import { ImagePlus } from "lucide-react-native";
 import DropDownPicker from "react-native-dropdown-picker";
@@ -98,9 +97,6 @@ export default function CreateItemScreen({ route }) {
         category: data.category,
         condition: data.condition,
         description: data.description,
-        userId: data.userId,
-        createdAt: data.createdAt,
-        id: data.id,
       });
       setImages(data.images || []);
     }
@@ -108,12 +104,8 @@ export default function CreateItemScreen({ route }) {
 
   const onSubmit = async (data) => {
     const itemData = {
-      id: mode === "edit" ? data.id : uuidv4(),
       ...data,
       price: parseFloat(data.price),
-      images,
-      userId: user.id,
-      createdAt: new Date().toISOString(),
     };
 
     try {
